@@ -2,7 +2,7 @@ package com.workhub.z.servicechat.controller.meeting;
 
 import com.github.hollykunge.security.common.msg.ObjectRestResponse;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
-import com.workhub.z.servicechat.config.common;
+import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.entity.meeting.ZzCodeMeetingRole;
 import com.workhub.z.servicechat.service.ZzCodeMeetingRoleService;
 import org.slf4j.Logger;
@@ -31,7 +31,7 @@ public class ZzCodeMeetingRoleController {
      * @MethodName: add
      * @Description: 新增
      * @Param: [ZzCodeMeetingRole]
-     * @Return: com.github.hollykunge.security.common.msg.ObjectRestResponse 返回id
+     * @Return: com.github.hollykunge.security.Common.msg.ObjectRestResponse 返回id
      * @Author: zhuqz
      * @Date: 2019/9/20
      **/
@@ -40,9 +40,9 @@ public class ZzCodeMeetingRoleController {
         ObjectRestResponse res = new ObjectRestResponse();
         res.rel(true);
         res.msg("200");
-        String userId= common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
-        String userIp = common.nulToEmptyString(request.getHeader("userHost"));
+        String userId= Common.nulToEmptyString(request.getHeader("userId"));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String userIp = Common.nulToEmptyString(request.getHeader("userHost"));
         try {
             zzCodeMeetingRole.setCrtUser(userId);
             zzCodeMeetingRole.setCrtName(userName);
@@ -55,7 +55,7 @@ public class ZzCodeMeetingRoleController {
                 res.rel(false);
             }
         }catch (Exception e){
-            logger.error(common.getExceptionMessage(e));
+            logger.error(Common.getExceptionMessage(e));
             res.rel(false);
             res.data("系统出错");
         }
@@ -65,7 +65,7 @@ public class ZzCodeMeetingRoleController {
      * @MethodName: update
      * @Description: 修改
      * @Param: [ZzCodeMeetingRole]
-     * @Return: com.github.hollykunge.security.common.msg.ObjectRestResponse
+     * @Return: com.github.hollykunge.security.Common.msg.ObjectRestResponse
      * @Author: zhuqz
      * @Date: 2019/9/20
      **/
@@ -75,10 +75,10 @@ public class ZzCodeMeetingRoleController {
         res.rel(true);
         res.msg("200");
         res.data("操作成功");
-        String userId = common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
-        String userNo = common.nulToEmptyString(request.getHeader("dnname"));
-        String userIp = common.nulToEmptyString(request.getHeader("userHost"));
+        String userId = Common.nulToEmptyString(request.getHeader("userId"));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String userNo = Common.nulToEmptyString(request.getHeader("dnname"));
+        String userIp = Common.nulToEmptyString(request.getHeader("userHost"));
         try {
             zzCodeMeetingRole.setUpdHost(userIp);
             zzCodeMeetingRole.setUpdName(userName);
@@ -87,7 +87,7 @@ public class ZzCodeMeetingRoleController {
         }catch (Exception e){
             res.rel(false);
             res.data("系统出错");
-            logger.error(common.getExceptionMessage(e));
+            logger.error(Common.getExceptionMessage(e));
         }
         return res;
     }
@@ -95,7 +95,7 @@ public class ZzCodeMeetingRoleController {
      * @MethodName: delete
      * @Description: 删除
      * @Param: [param]code 编码，id主键 两个任意传一个即可
-     * @Return: com.github.hollykunge.security.common.msg.ObjectRestResponse
+     * @Return: com.github.hollykunge.security.Common.msg.ObjectRestResponse
      * @Author: zhuqz
      * @Date: 2019/9/23
      **/
@@ -119,7 +119,7 @@ public class ZzCodeMeetingRoleController {
         }catch (Exception e){
             res.rel(false);
             res.data("系统出错");
-            logger.error(common.getExceptionMessage(e));
+            logger.error(Common.getExceptionMessage(e));
         }
         return res;
     }
@@ -127,7 +127,7 @@ public class ZzCodeMeetingRoleController {
      * @MethodName: query
      * @Description: 查询
      * @Param: [param] pageSize、pageNo页码页数；isUse是否使用1是0否；name名称
-     * @Return: com.github.hollykunge.security.common.msg.TableResultResponse
+     * @Return: com.github.hollykunge.security.Common.msg.TableResultResponse
      * @Author: zhuqz
      * @Date: 2019/9/23
      **/

@@ -7,10 +7,7 @@ import com.github.hollykunge.security.common.msg.ObjectRestResponse;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.workhub.z.servicechat.VO.GroupApplyVo;
-import com.workhub.z.servicechat.VO.GroupApproveVo;
-import com.workhub.z.servicechat.VO.MeetingVo;
-import com.workhub.z.servicechat.VO.SocketMsgVo;
+import com.workhub.z.servicechat.VO.*;
 import com.workhub.z.servicechat.config.*;
 import com.workhub.z.servicechat.dao.ZzGroupApproveDao;
 import com.workhub.z.servicechat.entity.group.ZzGroupApprove;
@@ -36,8 +33,6 @@ import java.io.IOException;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.*;
-
-import static com.workhub.z.servicechat.config.MessageType.MEETING_ADD;
 
 /**
  * author:zhuqz
@@ -74,7 +69,7 @@ public class ZzGroupApproveServiceImpl implements ZzGroupApproveService {
     public Map<String,String> approve(Map params){
         ZzGroupApproveLog approveLog = new ZzGroupApproveLog();
         AdminUser userInfo0 = iUserService.getUserInfo(params.get("userId").toString());
-        params.put("userNo",common.nulToEmptyString(userInfo0.getPId()));
+        params.put("userNo", Common.nulToEmptyString(userInfo0.getPId()));
         //是否已经审批了
         String ifApproveFlg = this.zzGroupApproveDao.ifApprove(params);
         Map<String,String> res = new HashMap();
@@ -93,7 +88,7 @@ public class ZzGroupApproveServiceImpl implements ZzGroupApproveService {
         String msg = "";
         JSONArray userListuserList = null;
         try {
-            msg = common.ClobToString(clob);
+            msg = Common.ClobToString(clob);
             JSONObject jsonObject = JSONObject.parseObject(msg);
             String code = jsonObject.getString("code");
             String message = jsonObject.getString("data");
@@ -115,9 +110,18 @@ public class ZzGroupApproveServiceImpl implements ZzGroupApproveService {
                     //如果建群正常，发送socket
                     if(restResponse.isRel()){
                         SocketMsgVo msgVo = new SocketMsgVo();
-                        msgVo.setCode(code);
+                        msgVo.setCode(SocketMsgTypeEnum.SINGLE_MSG);
                         msgVo.setReceiver(userInfo0.getId());
-                        msgVo.setMsg(msg);
+                        SocketMsgDetailVo detailVo = new SocketMsgDetailVo();
+                        for(SocketMsgDetailTypeEnum senum:SocketMsgDetailTypeEnum.values()){
+                            if(senum.getCode().equals(code)){
+                                detailVo.setCode(senum);
+                                break;
+                            }
+
+                        }
+                        detailVo.setData(message);
+                        msgVo.setMsg(detailVo);
                         rabbitMqMsgProducer.sendSocketPrivateMsg(msgVo);
                     }else{
                         res.put("res","0");
@@ -131,16 +135,16 @@ public class ZzGroupApproveServiceImpl implements ZzGroupApproveService {
                     //推送前端
                     MeetingVo meeting = zzMeetingService.queryById(groupJson.getString("groupId"));
                     userListuserList = JSONObject.parseArray(groupJson.getString("userList"));
-                    AnswerToFrontReponse answerToFrontReponse = new AnswerToFrontReponse();
+                    SocketMsgDetailVo answerToFrontReponse = new SocketMsgDetailVo();
                     answerToFrontReponse.setData(meeting);
-                    answerToFrontReponse.setCode(MEETING_ADD);
-                    String meet =  JSONObject.toJSONString(answerToFrontReponse);
+                    answerToFrontReponse.setCode(SocketMsgDetailTypeEnum.MEETING_ADD);
+                    //String meet =  JSONObject.toJSONString(answerToFrontReponse);
                     for (int i = 0; i < userListuserList.size(); i++) {
                         String user = userListuserList.getJSONObject(i).getString("userId");
                         SocketMsgVo msgVo = new SocketMsgVo();
-                        msgVo.setCode(code);
+                        msgVo.setCode(SocketMsgTypeEnum.SINGLE_MSG);
                         msgVo.setReceiver(user);
-                        msgVo.setMsg(meet);
+                        msgVo.setMsg(answerToFrontReponse);
                         rabbitMqMsgProducer.sendSocketPrivateMsg(msgVo);
                         //redis 缓存处理 把用户的群列表缓存更新
                         String key = CacheConst.userMeetIds+":"+user;
@@ -163,15 +167,15 @@ public class ZzGroupApproveServiceImpl implements ZzGroupApproveService {
             approveLog.setId(RandomId.getUUID());
             approveLog.setApprove("");
             approveLog.setApproveName("");
-            approveLog.setIp(common.nulToEmptyString(params.get("ip")));
-            approveLog.setApproveRes(common.nulToEmptyString(params.get("approveFlg")));
-            approveLog.setGroupId(common.nulToEmptyString(groupJson.getString("groupId")));
-            approveLog.setGroupName(common.nulToEmptyString(groupJson.getString("groupName")));
-            approveLog.setGroupDes(common.nulToEmptyString(groupJson.getString("groupDescribe")));
-            approveLog.setGroupLevel(common.nulToEmptyString(groupJson.getString("levels")));
-            approveLog.setGroupPro(common.nulToEmptyString(groupJson.getString("pname")));
-            approveLog.setGroupScope(common.nulToEmptyString(groupJson.getString("scop")));
-            approveLog.setGroupType(common.nulToEmptyString(groupJson.getString("groupType")));
+            approveLog.setIp(Common.nulToEmptyString(params.get("ip")));
+            approveLog.setApproveRes(Common.nulToEmptyString(params.get("approveFlg")));
+            approveLog.setGroupId(Common.nulToEmptyString(groupJson.getString("groupId")));
+            approveLog.setGroupName(Common.nulToEmptyString(groupJson.getString("groupName")));
+            approveLog.setGroupDes(Common.nulToEmptyString(groupJson.getString("groupDescribe")));
+            approveLog.setGroupLevel(Common.nulToEmptyString(groupJson.getString("levels")));
+            approveLog.setGroupPro(Common.nulToEmptyString(groupJson.getString("pname")));
+            approveLog.setGroupScope(Common.nulToEmptyString(groupJson.getString("scop")));
+            approveLog.setGroupType(Common.nulToEmptyString(groupJson.getString("groupType")));
             approveLog.setOperateTime(new Date());
             approveLog.setStatus("1");
             approveLog.setType(type);
@@ -188,7 +192,7 @@ public class ZzGroupApproveServiceImpl implements ZzGroupApproveService {
             res.put("groupName",groupJson.getString("groupName"));
             res.put("type",type);
         } catch (Exception e){
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             if(userListuserList!=null){
                 for (int i = 0; i < userListuserList.size(); i++) {
@@ -218,11 +222,11 @@ public class ZzGroupApproveServiceImpl implements ZzGroupApproveService {
         int pageNum=1;
         int pageSize=10;
         try {
-            pageNum=Integer.valueOf(common.nulToEmptyString(params.get("pageNo")));
-            pageSize=Integer.valueOf(common.nulToEmptyString(params.get("pageSize")));
+            pageNum=Integer.valueOf(Common.nulToEmptyString(params.get("pageNo")));
+            pageSize=Integer.valueOf(Common.nulToEmptyString(params.get("pageSize")));
         }catch (Exception e){
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
         PageHelper.startPage(pageNum, pageSize);
         if(params.get("type")==null){
@@ -237,17 +241,17 @@ public class ZzGroupApproveServiceImpl implements ZzGroupApproveService {
 
         for(Map temp:inList){
             Clob msglb = (Clob)temp.get("MSG");
-            String msgtemp = common.ClobToString(msglb);
+            String msgtemp = Common.ClobToString(msglb);
             JSONObject jsonObject = JSONObject.parseObject(msgtemp);
             String message = jsonObject.getString("data");
             JSONObject groupJson = JSONObject.parseObject(message);
             GroupApplyVo groupApplyVo = new GroupApplyVo();
-            groupApplyVo.setId(common.nulToEmptyString(temp.get("ID")));
-            groupApplyVo.setApply(common.nulToEmptyString(groupJson.getString("creator")));
-            groupApplyVo.setApplyName(common.nulToEmptyString(groupJson.getString("creatorName")));
-            groupApplyVo.setApplyTime(common.nulToEmptyString(temp.get("CREATETIME")));
-            String approveFlg = common.nulToEmptyString(temp.get("APPROVEFLG"));
-            String type = common.nulToEmptyString(temp.get("TYPE"));
+            groupApplyVo.setId(Common.nulToEmptyString(temp.get("ID")));
+            groupApplyVo.setApply(Common.nulToEmptyString(groupJson.getString("creator")));
+            groupApplyVo.setApplyName(Common.nulToEmptyString(groupJson.getString("creatorName")));
+            groupApplyVo.setApplyTime(Common.nulToEmptyString(temp.get("CREATETIME")));
+            String approveFlg = Common.nulToEmptyString(temp.get("APPROVEFLG"));
+            String type = Common.nulToEmptyString(temp.get("TYPE"));
             if(approveFlg.equals("0")){//如果是未审批
                 JSONArray approverJsonArray = JSONObject.parseArray(groupJson.getString("approveList"));
                 String approveStr = "";
@@ -268,17 +272,17 @@ public class ZzGroupApproveServiceImpl implements ZzGroupApproveService {
                 groupApplyVo.setApproveName(approveNameStr);
                 groupApplyVo.setApproveTime("");
             }else{
-                groupApplyVo.setApprove(common.nulToEmptyString(temp.get("APPROVE")));
-                groupApplyVo.setApproveName(common.nulToEmptyString(temp.get("APPROVENAME")));
-                groupApplyVo.setApproveTime(common.nulToEmptyString(temp.get("APPROVETIME")));
+                groupApplyVo.setApprove(Common.nulToEmptyString(temp.get("APPROVE")));
+                groupApplyVo.setApproveName(Common.nulToEmptyString(temp.get("APPROVENAME")));
+                groupApplyVo.setApproveTime(Common.nulToEmptyString(temp.get("APPROVETIME")));
             }
             groupApplyVo.setApproveStatus(approveFlg);
-            groupApplyVo.setGroupDescribe(common.nulToEmptyString(groupJson.getString("groupDescribe")));
-            groupApplyVo.setGroupId(common.nulToEmptyString(groupJson.getString("groupId")));
-            groupApplyVo.setGroupLevel(common.nulToEmptyString(groupJson.getString("levels")));
-            groupApplyVo.setGroupName(common.nulToEmptyString(groupJson.getString("groupName")));
-            groupApplyVo.setGroupScope(common.nulToEmptyString(groupJson.getString("scop")));
-            groupApplyVo.setGroupPro(common.nulToEmptyString(groupJson.getString("pname")));
+            groupApplyVo.setGroupDescribe(Common.nulToEmptyString(groupJson.getString("groupDescribe")));
+            groupApplyVo.setGroupId(Common.nulToEmptyString(groupJson.getString("groupId")));
+            groupApplyVo.setGroupLevel(Common.nulToEmptyString(groupJson.getString("levels")));
+            groupApplyVo.setGroupName(Common.nulToEmptyString(groupJson.getString("groupName")));
+            groupApplyVo.setGroupScope(Common.nulToEmptyString(groupJson.getString("scop")));
+            groupApplyVo.setGroupPro(Common.nulToEmptyString(groupJson.getString("pname")));
             JSONArray userListJsonArray = JSONObject.parseArray(groupJson.getString("userList"));
             groupApplyVo.setGroupMembers(userListJsonArray.size()+"");
             groupApplyVo.setType(type);
@@ -301,11 +305,11 @@ public class ZzGroupApproveServiceImpl implements ZzGroupApproveService {
         Clob clob = (Clob) res.get("MSG");
         String msgStr = null;
         try {
-            msgStr = common.ClobToString(clob);
+            msgStr = Common.ClobToString(clob);
         } catch (SQLException e) {
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         } catch (IOException e) {
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
         return msgStr;
     }
@@ -316,11 +320,11 @@ public class ZzGroupApproveServiceImpl implements ZzGroupApproveService {
         Clob clob = (Clob) res.get("MSG");
         String msgStr = null;
         try {
-            msgStr = common.ClobToString(clob);
+            msgStr = Common.ClobToString(clob);
         } catch (SQLException e) {
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         } catch (IOException e) {
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
         return msgStr;
     }
@@ -331,20 +335,20 @@ public class ZzGroupApproveServiceImpl implements ZzGroupApproveService {
         int pageNum=1;
         int pageSize=10;
         try {
-            pageNum=Integer.valueOf(common.nulToEmptyString(params.get("pageNo")));
-            pageSize=Integer.valueOf(common.nulToEmptyString(params.get("pageSize")));
+            pageNum=Integer.valueOf(Common.nulToEmptyString(params.get("pageNo")));
+            pageSize=Integer.valueOf(Common.nulToEmptyString(params.get("pageSize")));
         }catch (Exception e){
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
         PageHelper.startPage(pageNum, pageSize);
         List<Map> inList = this.zzGroupApproveDao.getApproveList(params);
         PageInfo pageInfo = new PageInfo<>(inList);
 
-        String userId = common.nulToEmptyString(params.get("userId"));
+        String userId = Common.nulToEmptyString(params.get("userId"));
         for(Map temp:inList){
             Clob msglb = (Clob)temp.get("MSG");
-            String msgtemp = common.ClobToString(msglb);
+            String msgtemp = Common.ClobToString(msglb);
             JSONObject jsonObject = JSONObject.parseObject(msgtemp);
             String message = jsonObject.getString("data");
             JSONObject groupJson = JSONObject.parseObject(message);
@@ -363,13 +367,13 @@ public class ZzGroupApproveServiceImpl implements ZzGroupApproveService {
 //            }
 
             // if(addResFlg){
-            String type = common.nulToEmptyString(temp.get("TYPE"));
+            String type = Common.nulToEmptyString(temp.get("TYPE"));
             GroupApproveVo groupApproveVo = new GroupApproveVo();
             groupApproveVo.setId(temp.get("ID").toString());
             groupApproveVo.setCreateTime(temp.get("CREATEDATE").toString());
             //UserInfo userInfo = iUserService.info(groupJson.getString("creator"));
-            groupApproveVo.setCreatorName(common.nulToEmptyString(groupJson.getString("creatorName")));
-            groupApproveVo.setGroupDescribe(common.nulToEmptyString(groupJson.getString("groupDescribe")));
+            groupApproveVo.setCreatorName(Common.nulToEmptyString(groupJson.getString("creatorName")));
+            groupApproveVo.setGroupDescribe(Common.nulToEmptyString(groupJson.getString("groupDescribe")));
             groupApproveVo.setGroupMembers((JSONObject.parseArray(groupJson.getString("userList")).size()+""));
             groupApproveVo.setGroupName(groupJson.getString("groupName"));
             groupApproveVo.setGroupLevel(groupJson.getString("levels"));

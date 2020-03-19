@@ -1,8 +1,8 @@
 package com.workhub.z.servicechat.service.impl;
 
 
-import com.workhub.z.servicechat.config.common;
-import com.workhub.z.servicechat.config.fileManage;
+import com.workhub.z.servicechat.config.Common;
+import com.workhub.z.servicechat.config.FileManage;
 import com.workhub.z.servicechat.dao.JobDao;
 import com.workhub.z.servicechat.service.JobService;
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ public class JobServiceImpl implements JobService {
             this.jobDao.delUnUsedFileList();
             for(String path:filePathList){
                 try {
-                    fileManage.delUploadFile(path);
+                    FileManage.delUploadFile(path);
                 } catch (Exception e) {
                     throw e;
                 }
@@ -43,7 +43,7 @@ public class JobServiceImpl implements JobService {
             log.info("定时任务执行成功，共删除无用附件"+filePathList.size()+"个");
         }catch (Exception e){
             log.error("定时任务删除无用附件出错：");
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
 
     }

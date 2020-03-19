@@ -7,10 +7,8 @@ import java.io.Serializable;
 *@Author: 忠
 *@date: 2019/7/19
 */
-public class MsgAnswerVO implements Serializable {
+public class MsgAnswerVo implements Serializable {
     private static final long serialVersionUID = -3286084993874070720L;
-    //      协议码 11
-    private int code;
 //      消息id
     private String nId;
 //      toid
@@ -19,14 +17,6 @@ public class MsgAnswerVO implements Serializable {
     private String content;
 //      应答状态 0 正常；1 异常
     private int status;
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
 
     public String getnId() {
         return nId;
@@ -64,7 +54,6 @@ public class MsgAnswerVO implements Serializable {
     @Override
     public String toString() {
         return "{" +
-                "code:" + code +
                 ", nId:'" + nId + '\'' +
                 ", contactId:'" + contactId + '\'' +
                 ", content:'" + content + '\'' +

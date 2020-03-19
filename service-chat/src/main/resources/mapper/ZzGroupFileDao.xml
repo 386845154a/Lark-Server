@@ -34,7 +34,7 @@
         <result property="extension" column="FILE_EXT" jdbcType="VARCHAR"></result>
     </resultMap>
 
-    <resultMap id="FileMonitoringVO" type="com.workhub.z.servicechat.VO.FileMonitoringVO">
+    <resultMap id="FileMonitoringVO" type="com.workhub.z.servicechat.VO.FileMonitoringVo">
         <result property="fileId" column="FILE_ID" jdbcType="VARCHAR"></result>
         <result property="fileName" column="FILE_NAME" jdbcType="VARCHAR"></result>
         <result property="filePath" column="FILE_PATH" jdbcType="VARCHAR"></result>

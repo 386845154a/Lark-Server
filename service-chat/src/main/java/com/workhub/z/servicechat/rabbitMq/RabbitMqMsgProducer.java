@@ -50,11 +50,6 @@ public class RabbitMqMsgProducer  implements RabbitTemplate.ReturnCallback, Rabb
         CorrelationData correlationId = new CorrelationData(RandomId.getUUID());
         rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE_SOCKET, RabbitConfig.ROUTINGKEY_SOCKET_TEAM_MSG, obj, correlationId);
     }
-    /*消息应答*/
-    public void sendSocketMsgAnswer(Object obj) {
-        CorrelationData correlationId = new CorrelationData(RandomId.getUUID());
-        rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE_SOCKET, RabbitConfig.ROUTINGKEY_SOCKET_MSG_ANSWER, obj, correlationId);
-    }
     /*私聊消息*/
     public void sendSocketPrivateMsg(Object obj) {
         CorrelationData correlationId = new CorrelationData(RandomId.getUUID());

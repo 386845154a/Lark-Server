@@ -1,7 +1,7 @@
 package com.workhub.z.servicechat.service;
 
 import com.github.hollykunge.security.common.msg.TableResultResponse;
-import com.workhub.z.servicechat.VO.PrivateFileVO;
+import com.workhub.z.servicechat.VO.PrivateFileVo;
 
 /**
  * 私人消息(ZzPrivateMsg)表服务接口
@@ -11,5 +11,5 @@ import com.workhub.z.servicechat.VO.PrivateFileVO;
  */
 public interface ZzPrivateMsgService {
     //私有聊天文件查询
-    public TableResultResponse<PrivateFileVO> getFileList(String userId, String receiverId,String query, int page, int size) throws Exception ;
+    public TableResultResponse<PrivateFileVo> getFileList(String userId, String receiverId, String query, int page, int size) throws Exception ;
 }

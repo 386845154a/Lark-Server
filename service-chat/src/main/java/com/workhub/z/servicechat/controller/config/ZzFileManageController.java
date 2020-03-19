@@ -2,11 +2,10 @@ package com.workhub.z.servicechat.controller.config;
 
 import com.github.hollykunge.security.admin.api.dto.AdminUser;
 import com.github.hollykunge.security.common.msg.ObjectRestResponse;
+import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.config.EncryptionAndDeciphering;
 import com.workhub.z.servicechat.config.MessageType;
 import com.workhub.z.servicechat.config.RandomId;
-import com.workhub.z.servicechat.config.common;
-import com.workhub.z.servicechat.entity.config.UserInfo;
 import com.workhub.z.servicechat.entity.group.ZzGroup;
 import com.workhub.z.servicechat.entity.group.ZzGroupFile;
 import com.workhub.z.servicechat.entity.group.ZzGroupStatus;
@@ -18,7 +17,6 @@ import com.workhub.z.servicechat.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -139,8 +137,8 @@ public class ZzFileManageController {
             //如果上传成功，入库记录
             if (res.equals("1")) {
                 zzGroupFile.setFileId(uplodaRes.get("file_id"));
-                String userId = common.nulToEmptyString(request.getHeader("userId"));
-                String userName = URLDecoder.decode(common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+                String userId = Common.nulToEmptyString(request.getHeader("userId"));
+                String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
                 zzGroupFile.setCreator((userId==null)?"":userId);
                 zzGroupFile.setCreatorName((userName==null)?"":userName);
                 zzGroupFile.setCreateTime(new Date());
@@ -165,14 +163,14 @@ public class ZzFileManageController {
                     zzGroupFile=null;
                     objectRestResponse.rel(false);
                     objectRestResponse.msg("500");
-                    objectRestResponse.data("上传失败："+ common.getExceptionMessage(e));
+                    objectRestResponse.data("上传失败："+ Common.getExceptionMessage(e));
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
             objectRestResponse.rel(false);
             objectRestResponse.msg("500");
-            objectRestResponse.data("上传失败："+ common.getExceptionMessage(e));
+            objectRestResponse.data("上传失败："+ Common.getExceptionMessage(e));
         }
         return objectRestResponse;
     }
@@ -250,7 +248,7 @@ public class ZzFileManageController {
 
                 }else{//群文件判断是否跨场所
                     List<UserInfo> userList  = iUserService.userList(users);
-                    if(common.isGroupCross(userList)){//如果跨场所
+                    if(Common.isGroupCross(userList)){//如果跨场所
                         downFlg = false;
                     }
                 }
@@ -287,8 +285,8 @@ public class ZzFileManageController {
     //下载 1成功 -1 失败 0 文件不存在,-2未审计通过，无权限下载
     public ObjectRestResponse downloadFile(@RequestParam String fileId) throws Exception{
         fileId = (fileId==null)?"":fileId;
-        String userId = common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String userId = Common.nulToEmptyString(request.getHeader("userId"));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
         String des = "";
         String groupId = "";
         //1会议0群
@@ -304,7 +302,7 @@ public class ZzFileManageController {
         ZzGroupFile zzGroupFile = this.zzGroupFileService.queryById(fileId);
         if(zzGroupFile == null){
             zzGroupFile = new ZzGroupFile();
-            common.putEntityNullToEmptyString(zzGroupFile);
+            Common.putEntityNullToEmptyString(zzGroupFile);
         }
         if (zzGroupFile.getFileId() == null || "".equals(zzGroupFile.getFileId())) {
             objectRestResponse.rel(false);
@@ -312,11 +310,11 @@ public class ZzFileManageController {
             return  objectRestResponse;
         }
         //如果是会议文件
-        if(String.valueOf(MessageType.MEETING_FILE).equals(common.nulToEmptyString(zzGroupFile.getIsGroup()))){
+        if(String.valueOf(MessageType.MEETING_FILE).equals(Common.nulToEmptyString(zzGroupFile.getIsGroup()))){
             MeetingDto meet = zzMeetingService.getMeetInf(zzGroupFile.getGroupId());
             if(meet == null){
                 meet = new MeetingDto();
-                common.putEntityNullToEmptyString(meet);
+                Common.putEntityNullToEmptyString(meet);
             }
             groupId = meet.getId();
             //日志类型：会议
@@ -326,7 +324,7 @@ public class ZzFileManageController {
             ZzGroup zzGroup = this.zzGroupService.queryById(zzGroupFile.getGroupId());
             if(zzGroup == null){
                 zzGroup = new ZzGroup();
-                common.putEntityNullToEmptyString(zzGroup);
+                Common.putEntityNullToEmptyString(zzGroup);
             }
             groupId = zzGroup.getGroupId();
             //判断文件是否未审计 begin
@@ -564,7 +562,7 @@ public class ZzFileManageController {
             outputStream.flush();
             //int i=1/0;
         }catch (Exception e){
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }finally {
             //关流
             if(outputStream!=null){

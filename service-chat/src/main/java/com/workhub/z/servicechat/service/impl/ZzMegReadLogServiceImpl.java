@@ -4,8 +4,8 @@ import com.github.hollykunge.security.admin.api.dto.AdminUser;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.workhub.z.servicechat.VO.MegReadLogVO;
-import com.workhub.z.servicechat.config.common;
+import com.workhub.z.servicechat.VO.MegReadLogVo;
+import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.dao.ZzGroupDao;
 import com.workhub.z.servicechat.entity.group.ZzGroup;
 import com.workhub.z.servicechat.entity.message.ZzMegReadLog;
@@ -69,9 +69,9 @@ public class ZzMegReadLogServiceImpl implements ZzMegReadLogService {
     @Override
     public ZzMegReadLog insert(ZzMegReadLog zzMegReadLog) {
         try {
-            common.putVoNullStringToEmptyString(zzMegReadLog);
+            Common.putVoNullStringToEmptyString(zzMegReadLog);
         }catch (Exception e){
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
         this.zzMegReadLogDao.insert(zzMegReadLog);
         return zzMegReadLog;
@@ -112,9 +112,9 @@ public class ZzMegReadLogServiceImpl implements ZzMegReadLogService {
                                                String senderName){
         PageHelper.startPage(pageNum, pageSize);
         Page<ZzMegReadLog> dataList = this.zzMegReadLogDao.queryAllReadLog(reviserName,senderName);
-        List<MegReadLogVO> megReadLogList = new ArrayList<>();
+        List<MegReadLogVo> megReadLogList = new ArrayList<>();
         for(ZzMegReadLog data:dataList){
-            MegReadLogVO megReadLogVO = new MegReadLogVO();
+            MegReadLogVo megReadLogVO = new MegReadLogVo();
             megReadLogVO.setId(data.getId());
             megReadLogVO.setReadtime(data.getReadtime());
             megReadLogVO.setSender(data.getSender());
@@ -134,10 +134,10 @@ public class ZzMegReadLogServiceImpl implements ZzMegReadLogService {
             megReadLogList.add(megReadLogVO);
         }
         try {
-            common.putVoNullStringToEmptyString(megReadLogList);
+            Common.putVoNullStringToEmptyString(megReadLogList);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
 
         TableResultResponse res = new TableResultResponse(

@@ -3,8 +3,8 @@ package com.workhub.z.servicechat.controller.group;
 import com.github.hollykunge.security.common.msg.ObjectRestResponse;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
 import com.workhub.z.servicechat.VO.GroupStatusVo;
+import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.config.RandomId;
-import com.workhub.z.servicechat.config.common;
 import com.workhub.z.servicechat.entity.group.ZzGroupStatus;
 import com.workhub.z.servicechat.service.ZzGroupStatusService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +31,8 @@ public class ZzGroupStatusController {
         ObjectRestResponse res = new ObjectRestResponse();
         res.msg("200");
         res.rel(true);
-        String userId = common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String userId = Common.nulToEmptyString(request.getHeader("userId"));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
         zzGroupStatus.setId(RandomId.getUUID());
         zzGroupStatus.setOperator(userId);
         zzGroupStatus.setOperatorName(userName);
@@ -53,9 +53,9 @@ public class ZzGroupStatusController {
     */
     @PostMapping("query")
     public TableResultResponse<GroupStatusVo> query(@RequestParam Map params) throws Exception{
-        String userId = common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
-        String all = common.nulToEmptyString(params.get("all"));//是否是全部查询
+        String userId = Common.nulToEmptyString(request.getHeader("userId"));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String all = Common.nulToEmptyString(params.get("all"));//是否是全部查询
         if(!"1".equals(all)){//值查询当前人在群里能看到的记录，而不是全部
             params.put("userId",userId);
         }

@@ -10,7 +10,7 @@ import com.workhub.z.servicechat.VO.GroupListVo;
 import com.workhub.z.servicechat.VO.NoReadVo;
 import com.workhub.z.servicechat.VO.UserNewMsgVo;
 import com.workhub.z.servicechat.config.CacheConst;
-import com.workhub.z.servicechat.config.common;
+import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.dao.ZzUserGroupDao;
 import com.workhub.z.servicechat.entity.group.ZzGroup;
 import com.workhub.z.servicechat.entity.group.ZzUserGroup;
@@ -34,7 +34,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.workhub.z.servicechat.config.common.putEntityNullToEmptyString;
+import static com.workhub.z.servicechat.config.Common.putEntityNullToEmptyString;
 
 //import com.workhub.z.servicechat.VO.ContactVO;
 
@@ -70,10 +70,10 @@ public class ZzUserGroupServiceImpl implements ZzUserGroupService {
     public ZzUserGroup queryById(String id) {
         ZzUserGroup zzUserGroup = this.zzUserGroupDao.queryById(id);
         try {
-            common.putVoNullStringToEmptyString(zzUserGroup);
+            Common.putVoNullStringToEmptyString(zzUserGroup);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
 
         return zzUserGroup;
@@ -162,7 +162,7 @@ public class ZzUserGroupServiceImpl implements ZzUserGroupService {
         //新写查询分页
         PageHelper.startPage(page, size);
         List<GroupListVo> list = this.zzUserGroupDao.groupList(id);
-        common.putVoNullStringToEmptyString(list);
+        Common.putVoNullStringToEmptyString(list);
         PageInfo<GroupListVo> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
@@ -176,10 +176,10 @@ public class ZzUserGroupServiceImpl implements ZzUserGroupService {
     public List<UserNewMsgVo> getUserNewMsgList2(String id) {
         List<UserNewMsgVo> list=this.zzUserGroupDao.getUserNewMsgList2(id);
         try {
-            common.putVoNullStringToEmptyString(list);
+            Common.putVoNullStringToEmptyString(list);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
         return list;
     }
@@ -187,10 +187,10 @@ public class ZzUserGroupServiceImpl implements ZzUserGroupService {
     public List<RawMessageDto> getUserNewMsgList(String id) {
         List<RawMessageDto> list=this.zzUserGroupDao.getUserNewMsgList(id);
         try {
-            common.putVoNullStringToEmptyString(list);
+            Common.putVoNullStringToEmptyString(list);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
         return list;
     }
@@ -251,8 +251,8 @@ public class ZzUserGroupServiceImpl implements ZzUserGroupService {
                 contactVO.setIsMute(false);
 //               群组密级
                 contactVO.setSecretLevel(Integer.parseInt(group.getLevels()));
-                contactVO.setGroupOwnerId(common.nulToEmptyString(group.getGroupOwnerId()));
-                contactVO.setGroupOwnerName(common.nulToEmptyString(group.getGroupOwnerName()));
+                contactVO.setGroupOwnerId(Common.nulToEmptyString(group.getGroupOwnerId()));
+                contactVO.setGroupOwnerName(Common.nulToEmptyString(group.getGroupOwnerName()));
                 try {
                     contactVO.setMemberNum(Math.toIntExact(this.zzGroupService.groupUserListTotal(group.getGroupId())));
                 } catch (Exception e) {
@@ -295,10 +295,10 @@ public class ZzUserGroupServiceImpl implements ZzUserGroupService {
         });
         Map<String,List<ContactVO>> data=new HashMap<>();
         try {
-            common.putVoNullStringToEmptyString(list);
+            Common.putVoNullStringToEmptyString(list);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
         data.put(id,list);//当前登录人的id作为key，联系人列表作为value
         rabbitMqMsgProducer.sendMsg(data);
@@ -357,7 +357,7 @@ public class ZzUserGroupServiceImpl implements ZzUserGroupService {
                      sDate = sf.parse(n.getCreatetime());
                 } catch (ParseException e) {
                     log.error("消息日期转换错误");
-                    log.error(common.getExceptionMessage(e));
+                    log.error(Common.getExceptionMessage(e));
                     sDate = new Date();
                 }
                 if(new SimpleDateFormat("yyyy-MM-dd").format(sDate).equals(new SimpleDateFormat("yyyy-MM-dd").format(new Date()))){//格式化为相同格式
@@ -373,8 +373,8 @@ public class ZzUserGroupServiceImpl implements ZzUserGroupService {
                 contactVO.setIsMute(false);
 //               群组密级
                 contactVO.setSecretLevel(Integer.parseInt(group.getLevels()));
-                contactVO.setGroupOwnerId(common.nulToEmptyString(group.getGroupOwnerId()));
-                contactVO.setGroupOwnerName(common.nulToEmptyString(group.getGroupOwnerName()));
+                contactVO.setGroupOwnerId(Common.nulToEmptyString(group.getGroupOwnerId()));
+                contactVO.setGroupOwnerName(Common.nulToEmptyString(group.getGroupOwnerName()));
                 try {
                     contactVO.setMemberNum(Math.toIntExact(this.zzGroupService.groupUserListTotal(group.getGroupId())));
                 } catch (Exception e) {
@@ -397,7 +397,7 @@ public class ZzUserGroupServiceImpl implements ZzUserGroupService {
                     sDate = sf.parse(n.getCreatetime());
                 } catch (ParseException e) {
                     log.error("消息日期转换错误");
-                    log.error(common.getExceptionMessage(e));
+                    log.error(Common.getExceptionMessage(e));
                     sDate = new Date();
                 }
                 if(new SimpleDateFormat("yyyy-MM-dd").format(sDate).equals(new SimpleDateFormat("yyyy-MM-dd").format(new Date()))){//格式化为相同格式
@@ -419,10 +419,10 @@ public class ZzUserGroupServiceImpl implements ZzUserGroupService {
         });
         Map<String,List<ContactVO>> data=new HashMap<>();
         try {
-            common.putVoNullStringToEmptyString(list);
+            Common.putVoNullStringToEmptyString(list);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
         data.put(id,list);//当前登录人的id作为key，联系人列表作为value
         rabbitMqMsgProducer.sendMsg(data);

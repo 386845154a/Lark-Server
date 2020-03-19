@@ -5,7 +5,7 @@ import com.github.hollykunge.security.common.msg.TableResultResponse;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.workhub.z.servicechat.VO.*;
-import com.workhub.z.servicechat.config.common;
+import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.dao.ZzMessageInfoDao;
 import com.workhub.z.servicechat.entity.message.ZzMessageInfo;
 import com.workhub.z.servicechat.model.ContactsMessageDto;
@@ -20,8 +20,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.workhub.z.servicechat.config.common.aggregation;
-import static com.workhub.z.servicechat.config.common.putEntityNullToEmptyString;
+import static com.workhub.z.servicechat.config.Common.aggregation;
+import static com.workhub.z.servicechat.config.Common.putEntityNullToEmptyString;
 
 /**
  * 消息存储(ZzMessageInfo)表服务实现类
@@ -232,7 +232,7 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
             pageSize=Integer.valueOf(size);
         }catch (Exception e){
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
         PageHelper.startPage(pageNum, pageSize);
         List<String> dataList=null;
@@ -248,9 +248,9 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
         SimpleDateFormat shortTimef = new SimpleDateFormat("HH:mm");
         SimpleDateFormat shortDayf = new SimpleDateFormat("MM-dd");
         PageInfo pageInfo = new PageInfo<>(dataList);
-        List<SingleMessageVO> voList=new ArrayList<>();
+        List<SingleMessageVo> voList=new ArrayList<>();
         for(String temp:dataList){
-            SingleMessageVO vo = JSON.parseObject(temp, SingleMessageVO.class);
+            SingleMessageVo vo = JSON.parseObject(temp, SingleMessageVo.class);
             Date time = vo.getTime();//发送时间
             String shortTime = "";//当天显示十分，昨天以前显示日期
             String fullTime = "";//全日期
@@ -267,10 +267,10 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
             voList.add(vo);
         }
         try {
-            common.putVoNullStringToEmptyString(voList);
+            Common.putVoNullStringToEmptyString(voList);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
 
         TableResultResponse res = new TableResultResponse(
@@ -294,7 +294,7 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
             pageSize=Integer.valueOf(size);
         }catch (Exception e){
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
         PageHelper.startPage(pageNum, pageSize);
         List<RawMessageDto> dataList=null;
@@ -310,22 +310,22 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
         SimpleDateFormat shortTimef = new SimpleDateFormat("HH:mm");
         SimpleDateFormat shortDayf = new SimpleDateFormat("MM-dd");
         PageInfo pageInfo = new PageInfo<>(dataList);
-        List<NewSingleMessageVO> voList=new ArrayList<>();
+        List<NewSingleMessageVo> voList=new ArrayList<>();
         for(RawMessageDto dto:dataList){
             NewMessageVo vo1= this.rawMsgToMsgVo(dto);
-            NewSingleMessageVO vo = new NewSingleMessageVO();
+            NewSingleMessageVo vo = new NewSingleMessageVo();
             try {
-                common.copyObject(vo1,vo);
+                Common.copyObject(vo1,vo);
             } catch (Exception e) {
                 log.error("消息转换错误");
-                log.error(common.getExceptionMessage(e));
+                log.error(Common.getExceptionMessage(e));
             }
             Date time = new Date();
             try {
                 time = fullf.parse(vo.getSendTime());
             } catch (ParseException e) {
                 log.error("消息日期转换错误");
-                log.error(common.getExceptionMessage(e));
+                log.error(Common.getExceptionMessage(e));
             }
             String shortTime = "";//当天显示十分，昨天以前显示日期
             if(time!=null){
@@ -339,10 +339,10 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
             voList.add(vo);
         }
         try {
-            common.putVoNullStringToEmptyString(voList);
+            Common.putVoNullStringToEmptyString(voList);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
 
         TableResultResponse res = new TableResultResponse(
@@ -362,13 +362,13 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
         int pageNum=1;
         int pageSize=10;
         try {
-            pageNum=Integer.valueOf(common.nulToEmptyString(params.get("pageNo")));
-            pageSize=Integer.valueOf(common.nulToEmptyString(params.get("pageSize")));
+            pageNum=Integer.valueOf(Common.nulToEmptyString(params.get("pageNo")));
+            pageSize=Integer.valueOf(Common.nulToEmptyString(params.get("pageSize")));
         }catch (Exception e){
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
-        String sendTimeQuery= common.nulToEmptyString(params.get("sendTime"));
+        String sendTimeQuery= Common.nulToEmptyString(params.get("sendTime"));
         if(!"".equals(sendTimeQuery)){
             params.put("timeBegin",sendTimeQuery.toString().split(",")[0]);
             params.put("timeEnd",sendTimeQuery.toString().split(",")[1]);
@@ -384,11 +384,11 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
         for(Map<String,String> map:dataList){
             String temp = map.get("CONTENT");
             MessageMonitoringPrivateVo vo = new MessageMonitoringPrivateVo();
-            String senderName = common.nulToEmptyString(common.getJsonStringKeyValue(temp,"username"));
+            String senderName = Common.nulToEmptyString(Common.getJsonStringKeyValue(temp,"username"));
             vo.setSenderName(senderName);
-            String receiverId = common.nulToEmptyString(common.getJsonStringKeyValue(temp,"toId"));
+            String receiverId = Common.nulToEmptyString(Common.getJsonStringKeyValue(temp,"toId"));
             vo.setReceiverId(receiverId);
-            String senderId = common.nulToEmptyString(common.getJsonStringKeyValue(temp,"fromId"));
+            String senderId = Common.nulToEmptyString(Common.getJsonStringKeyValue(temp,"fromId"));
             vo.setSenderId(senderId);
             String ip = map.get("IP");
             vo.setIp(ip);
@@ -397,24 +397,24 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
             String senderSN = map.get("SENDER_SN");
             vo.setSenderSn(senderSN);
             vo.setStatus("成功");
-            String senderLevel = common.nulToEmptyString(common.getJsonStringKeyValue(temp,"contactInfo.secretLevel"));
+            String senderLevel = Common.nulToEmptyString(Common.getJsonStringKeyValue(temp,"contactInfo.secretLevel"));
             vo.setSenderLevel(senderLevel);
             String sendTime = map.get("SENDTIME");
             vo.setSendTime(sendTime);
-            String messageLevel = common.nulToEmptyString(common.getJsonStringKeyValue(temp,"content.secretLevel"));
+            String messageLevel = Common.nulToEmptyString(Common.getJsonStringKeyValue(temp,"content.secretLevel"));
             vo.setMessageLevel(messageLevel);
-            String receiverName = common.nulToEmptyString(common.getJsonStringKeyValue(temp,"toName"));
+            String receiverName = Common.nulToEmptyString(Common.getJsonStringKeyValue(temp,"toName"));
             vo.setReceiverName(receiverName);
-            String messageContent = common.nulToEmptyString(common.getJsonStringKeyValue(temp,"content.title"));
+            String messageContent = Common.nulToEmptyString(Common.getJsonStringKeyValue(temp,"content.title"));
             vo.setMessageContent(messageContent);
             vo.setId(map.get("ID"));
             voList.add(vo);
         }
         try {
-            common.putVoNullStringToEmptyString(voList);
+            Common.putVoNullStringToEmptyString(voList);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
 
         TableResultResponse res = new TableResultResponse(
@@ -434,13 +434,13 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
         int pageNum=1;
         int pageSize=10;
         try {
-            pageNum=Integer.valueOf(common.nulToEmptyString(params.get("pageNo")));
-            pageSize=Integer.valueOf(common.nulToEmptyString(params.get("pageSize")));
+            pageNum=Integer.valueOf(Common.nulToEmptyString(params.get("pageNo")));
+            pageSize=Integer.valueOf(Common.nulToEmptyString(params.get("pageSize")));
         }catch (Exception e){
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
-        String sendTimeQuery= common.nulToEmptyString(params.get("sendTime"));
+        String sendTimeQuery= Common.nulToEmptyString(params.get("sendTime"));
         if(!"".equals(sendTimeQuery)){
             params.put("timeBegin",sendTimeQuery.toString().split(",")[0]);
             params.put("timeEnd",sendTimeQuery.toString().split(",")[1]);
@@ -458,10 +458,10 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
             voList.add(vo);
         }
         try {
-            common.putVoNullStringToEmptyString(voList);
+            Common.putVoNullStringToEmptyString(voList);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
 
         TableResultResponse res = new TableResultResponse(
@@ -479,13 +479,13 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
         int pageNum=1;
         int pageSize=10;
         try {
-            pageNum=Integer.valueOf(common.nulToEmptyString(params.get("pageNo")));
-            pageSize=Integer.valueOf(common.nulToEmptyString(params.get("pageSize")));
+            pageNum=Integer.valueOf(Common.nulToEmptyString(params.get("pageNo")));
+            pageSize=Integer.valueOf(Common.nulToEmptyString(params.get("pageSize")));
         }catch (Exception e){
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
-        String sendTimeQuery= common.nulToEmptyString(params.get("sendTime"));
+        String sendTimeQuery= Common.nulToEmptyString(params.get("sendTime"));
         if(!"".equals(sendTimeQuery)){
             params.put("timeBegin",sendTimeQuery.toString().split(",")[0]);
             params.put("timeEnd",sendTimeQuery.toString().split(",")[1]);
@@ -501,15 +501,15 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
         for(Map<String,String> map:dataList){
             String temp = map.get("CONTENT");
             MessageMonitoringPrivateVo vo = new MessageMonitoringPrivateVo();
-            String senderName = common.nulToEmptyString(common.getJsonStringKeyValue(temp,"username"));
+            String senderName = Common.nulToEmptyString(Common.getJsonStringKeyValue(temp,"username"));
             vo.setSenderName(senderName);
-            String senderLevel = common.nulToEmptyString(common.getJsonStringKeyValue(temp,"contactInfo.secretLevel"));
+            String senderLevel = Common.nulToEmptyString(Common.getJsonStringKeyValue(temp,"contactInfo.secretLevel"));
             vo.setSenderLevel(senderLevel);
-            String receiverId = common.nulToEmptyString(common.getJsonStringKeyValue(temp,"toId"));
+            String receiverId = Common.nulToEmptyString(Common.getJsonStringKeyValue(temp,"toId"));
             vo.setReceiverId(receiverId);
-            String senderId = common.nulToEmptyString(common.getJsonStringKeyValue(temp,"fromId"));
+            String senderId = Common.nulToEmptyString(Common.getJsonStringKeyValue(temp,"fromId"));
             vo.setSenderId(senderId);
-            String receiverName = common.nulToEmptyString(common.getJsonStringKeyValue(temp,"toName"));
+            String receiverName = Common.nulToEmptyString(Common.getJsonStringKeyValue(temp,"toName"));
             vo.setReceiverName(receiverName);
             String sendTime = map.get("SENDTIME");
             String ip = map.get("IP");
@@ -520,18 +520,18 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
             vo.setSenderSn(senderSN);
             vo.setStatus("成功");
             vo.setSendTime(sendTime);
-            String messageLevel = common.nulToEmptyString(common.getJsonStringKeyValue(temp,"content.secretLevel"));
+            String messageLevel = Common.nulToEmptyString(Common.getJsonStringKeyValue(temp,"content.secretLevel"));
             vo.setMessageLevel(messageLevel);
-            String messageContent = common.nulToEmptyString(common.getJsonStringKeyValue(temp,"content.title"));
+            String messageContent = Common.nulToEmptyString(Common.getJsonStringKeyValue(temp,"content.title"));
             vo.setMessageContent(messageContent);
             vo.setId(map.get("ID"));
             voList.add(vo);
         }
         try {
-            common.putVoNullStringToEmptyString(voList);
+            Common.putVoNullStringToEmptyString(voList);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
 
         TableResultResponse res = new TableResultResponse(
@@ -554,56 +554,56 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
 
     public NewMessageVo rawMsgToMsgVo(RawMessageDto rawDto){
         NewMessageVo msg = new NewMessageVo();
-        msg.setId(common.nulToEmptyString(rawDto.getMsgId()));
-        msg.setSendTime(common.nulToEmptyString(rawDto.getCreatetime()));
-        //msg.setTeamType(common.nulToEmptyString(rawDto.getType()));
-        //msg.setCross(common.nulToEmptyString(rawDto.getCross()));
+        msg.setId(Common.nulToEmptyString(rawDto.getMsgId()));
+        msg.setSendTime(Common.nulToEmptyString(rawDto.getCreatetime()));
+        //msg.setTeamType(Common.nulToEmptyString(rawDto.getType()));
+        //msg.setCross(Common.nulToEmptyString(rawDto.getCross()));
 
         NewContactVo sender = new NewContactVo();
-        sender.setId(common.nulToEmptyString(rawDto.getSenderid()));
-        sender.setName(common.nulToEmptyString(rawDto.getSendername()));
-        sender.setAvartar(common.nulToEmptyString(rawDto.getSenderavatar()));
-        sender.setLevels(common.nulToEmptyString(rawDto.getSenderlevels()));
-        sender.setPid(common.nulToEmptyString(rawDto.getSenderpid()));
+        sender.setId(Common.nulToEmptyString(rawDto.getSenderid()));
+        sender.setName(Common.nulToEmptyString(rawDto.getSendername()));
+        sender.setAvartar(Common.nulToEmptyString(rawDto.getSenderavatar()));
+        sender.setLevels(Common.nulToEmptyString(rawDto.getSenderlevels()));
+        sender.setPid(Common.nulToEmptyString(rawDto.getSenderpid()));
 
         /*try {
-            common.putVoNullStringToEmptyString(sender);
+            Common.putVoNullStringToEmptyString(sender);
         } catch (Exception e) {
             log.error("消息转换出错");
         }*/
         msg.setSender(sender);
 
         NewContactVo contactor = new NewContactVo();
-        contactor.setId(common.nulToEmptyString(rawDto.getReceiverid()));
-        contactor.setName(common.nulToEmptyString(rawDto.getReceivername()));
-        contactor.setAvartar(common.nulToEmptyString(rawDto.getReceiveravatar()));
-        contactor.setLevels(common.nulToEmptyString(rawDto.getReceiverlevels()));
-        contactor.setPid(common.nulToEmptyString(rawDto.getReceiverpid()));
-        contactor.setGroupOwner(common.nulToEmptyString(rawDto.getReceivergroupowner()));
-        contactor.setMemberNum(common.nulToEmptyString(rawDto.getReceivermembernum()));
+        contactor.setId(Common.nulToEmptyString(rawDto.getReceiverid()));
+        contactor.setName(Common.nulToEmptyString(rawDto.getReceivername()));
+        contactor.setAvartar(Common.nulToEmptyString(rawDto.getReceiveravatar()));
+        contactor.setLevels(Common.nulToEmptyString(rawDto.getReceiverlevels()));
+        contactor.setPid(Common.nulToEmptyString(rawDto.getReceiverpid()));
+        contactor.setGroupOwner(Common.nulToEmptyString(rawDto.getReceivergroupowner()));
+        contactor.setMemberNum(Common.nulToEmptyString(rawDto.getReceivermembernum()));
         /*try {
-            common.putVoNullStringToEmptyString(contactor);
+            Common.putVoNullStringToEmptyString(contactor);
         } catch (Exception e) {
             log.error("消息转换出错");
         }*/
         msg.setContactor(contactor);
 
         NewContentVo contentVo = new NewContentVo();
-        contentVo.setTitle(common.nulToEmptyString(rawDto.getMsg()));
-        contentVo.setType(common.nulToEmptyString(rawDto.getFiletype()));
-        contentVo.setSecretLevel(common.nulToEmptyString(rawDto.getLevels()));
-        contentVo.setExtension(common.nulToEmptyString(rawDto.getFileext()));
-        contentVo.setFileSize(common.nulToEmptyString(rawDto.getFilesize()));
-        contentVo.setId(common.nulToEmptyString(rawDto.getFileid()));
+        contentVo.setTitle(Common.nulToEmptyString(rawDto.getMsg()));
+        contentVo.setType(Common.nulToEmptyString(rawDto.getFiletype()));
+        contentVo.setSecretLevel(Common.nulToEmptyString(rawDto.getLevels()));
+        contentVo.setExtension(Common.nulToEmptyString(rawDto.getFileext()));
+        contentVo.setFileSize(Common.nulToEmptyString(rawDto.getFilesize()));
+        contentVo.setId(Common.nulToEmptyString(rawDto.getFileid()));
         /*try {
-            common.putVoNullStringToEmptyString(contentVo);
+            Common.putVoNullStringToEmptyString(contentVo);
         } catch (Exception e) {
             log.error("消息转换出错");
         }*/
         msg.setMsgContent(contentVo);
 
         /*try {
-            common.putVoNullStringToEmptyString(msg);
+            Common.putVoNullStringToEmptyString(msg);
         } catch (Exception e) {
             log.error("消息转换出错");
         }*/
@@ -617,29 +617,29 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
      * @return
      */
 
-    public SingleMessageVO rawMsgToSingleVo(RawMessageDto rawDto){
-        SingleMessageVO msg = new SingleMessageVO();
-        msg.setId(common.nulToEmptyString(rawDto.getMsgId()));
-        msg.setUsername(common.nulToEmptyString(rawDto.getSendername()));
-        msg.setAvatar(common.nulToEmptyString(rawDto.getSenderavatar()));
-        msg.setFromId(common.nulToEmptyString(rawDto.getSenderid()));
-        msg.setToId(common.nulToEmptyString(rawDto.getReceiverid()));
-        msg.setSecretLevel(Integer.parseInt(common.nulToZeroString(rawDto.getLevels())));
-        msg.setType(Integer.parseInt(common.nulToZeroString(rawDto.getFiletype())));
+    public SingleMessageVo rawMsgToSingleVo(RawMessageDto rawDto){
+        SingleMessageVo msg = new SingleMessageVo();
+        msg.setId(Common.nulToEmptyString(rawDto.getMsgId()));
+        msg.setUsername(Common.nulToEmptyString(rawDto.getSendername()));
+        msg.setAvatar(Common.nulToEmptyString(rawDto.getSenderavatar()));
+        msg.setFromId(Common.nulToEmptyString(rawDto.getSenderid()));
+        msg.setToId(Common.nulToEmptyString(rawDto.getReceiverid()));
+        msg.setSecretLevel(Integer.parseInt(Common.nulToZeroString(rawDto.getLevels())));
+        msg.setType(Integer.parseInt(Common.nulToZeroString(rawDto.getFiletype())));
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
             msg.setTime(format.parse(rawDto.getCreatetime()));
         } catch (ParseException e) {
             log.error("日期转换错误");
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
         msg.setGroup(rawDto.getType().equals("GROUP") || rawDto.getType().equals("MEET"));
-        ContentVO contentVO = new ContentVO();
-        contentVO.setExtension(common.nulToEmptyString(rawDto.getFileext()));
-        contentVO.setId(common.nulToEmptyString(rawDto.getFileid()));
-        contentVO.setSecretLevel(common.nulToEmptyString(rawDto.getLevels()));
-        contentVO.setTitle(common.nulToEmptyString(rawDto.getMsg()));
-        contentVO.setType(Integer.parseInt(common.nulToZeroString(rawDto.getFiletype())));
+        ContentVo contentVO = new ContentVo();
+        contentVO.setExtension(Common.nulToEmptyString(rawDto.getFileext()));
+        contentVO.setId(Common.nulToEmptyString(rawDto.getFileid()));
+        contentVO.setSecretLevel(Common.nulToEmptyString(rawDto.getLevels()));
+        contentVO.setTitle(Common.nulToEmptyString(rawDto.getMsg()));
+        contentVO.setType(Integer.parseInt(Common.nulToZeroString(rawDto.getFiletype())));
         contentVO.setUrl("");
         msg.setContent(contentVO);
         return msg;
@@ -652,28 +652,28 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
      */
     public MessageMonitoringPrivateVo rawMsgToMonitorVo(RawMessageDto rawDto){
         MessageMonitoringPrivateVo vo = new MessageMonitoringPrivateVo();
-        String senderName = common.nulToEmptyString(rawDto.getSendername());
+        String senderName = Common.nulToEmptyString(rawDto.getSendername());
         vo.setSenderName(senderName);
-        String receiverId = common.nulToEmptyString(rawDto.getReceiverid());
+        String receiverId = Common.nulToEmptyString(rawDto.getReceiverid());
         vo.setReceiverId(receiverId);
-        String senderId = common.nulToEmptyString(rawDto.getSenderid());
+        String senderId = Common.nulToEmptyString(rawDto.getSenderid());
         vo.setSenderId(senderId);
-        String ip = common.nulToEmptyString(rawDto.getIp());
+        String ip = Common.nulToEmptyString(rawDto.getIp());
         vo.setIp(ip);
-        String id = common.nulToEmptyString(rawDto.getMsgId());
+        String id = Common.nulToEmptyString(rawDto.getMsgId());
         vo.setId(id);
-        String senderSN = common.nulToEmptyString(rawDto.getSenderpid());
+        String senderSN = Common.nulToEmptyString(rawDto.getSenderpid());
         vo.setSenderSn(senderSN);
         vo.setStatus("成功");
-        String senderLevel = common.nulToEmptyString(rawDto.getSenderlevels());
+        String senderLevel = Common.nulToEmptyString(rawDto.getSenderlevels());
         vo.setSenderLevel(senderLevel);
-        String sendTime = common.nulToEmptyString(rawDto.getCreatetime());
+        String sendTime = Common.nulToEmptyString(rawDto.getCreatetime());
         vo.setSendTime(sendTime);
-        String messageLevel = common.nulToEmptyString(rawDto.getLevels());
+        String messageLevel = Common.nulToEmptyString(rawDto.getLevels());
         vo.setMessageLevel(messageLevel);
-        String receiverName = common.nulToEmptyString(rawDto.getReceivername());
+        String receiverName = Common.nulToEmptyString(rawDto.getReceivername());
         vo.setReceiverName(receiverName);
-        String messageContent = common.nulToEmptyString(rawDto.getMsg());
+        String messageContent = Common.nulToEmptyString(rawDto.getMsg());
         vo.setMessageContent(messageContent);
         return  vo;
     }

@@ -3,11 +3,11 @@ package com.workhub.z.servicechat.rabbitMq;
 import com.alibaba.fastjson.JSONObject;
 import com.github.hollykunge.security.common.vo.mq.MsgQueue;
 import com.rabbitmq.client.Channel;
-import com.workhub.z.servicechat.VO.SocketMsgVo;
-import com.workhub.z.servicechat.VO.SocketTeamListBindVo;
-import com.workhub.z.servicechat.VO.SystemMsgVO;
+import com.workhub.z.servicechat.VO.*;
+import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.config.MessageType;
-import com.workhub.z.servicechat.config.common;
+import com.workhub.z.servicechat.config.SocketMsgDetailTypeEnum;
+import com.workhub.z.servicechat.config.SocketMsgTypeEnum;
 import com.workhub.z.servicechat.entity.group.ZzGroupApproveLog;
 import com.workhub.z.servicechat.entity.group.ZzGroupStatus;
 import com.workhub.z.servicechat.service.ZzGroupApproveLogService;
@@ -21,7 +21,6 @@ import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.tio.websocket.server.WsServerStarter;
 
 import java.io.IOException;
 import java.util.List;
@@ -48,7 +47,7 @@ public class RabbitMqMsgConsumer {
     public void process( Message message, Channel channel) {
         logger.info("测试：接收处理队列A当中的消息");
         String msg =  new String(message.getBody());
-        SystemMsgVO systemMsgVO = new SystemMsgVO();
+        SystemMsgVo systemMsgVO = new SystemMsgVo();
         systemMsgVO.setCode(SYS_MSG);
         MsgQueue msgQueue = JSONObject.parseObject(msg,MsgQueue.class);
         //WsServerStarter wsServerStarter = IworkWebsocketStarter.getWsServerStarter();
@@ -61,12 +60,12 @@ public class RabbitMqMsgConsumer {
             //模拟异常
             //int i=1/0;
         }catch (Exception e){
-            logger.error(common.getExceptionMessage(e));//报错信息打印日志
+            logger.error(Common.getExceptionMessage(e));//报错信息打印日志
             try {
                 //发送异常消息回滚到队列，接着消费
                 channel.basicNack(message.getMessageProperties().getDeliveryTag(), false,false);
             }catch (Exception ex){
-                logger.error(common.getExceptionMessage(ex));//报错信息打印日志
+                logger.error(Common.getExceptionMessage(ex));//报错信息打印日志
             }
 
         }
@@ -95,13 +94,13 @@ public class RabbitMqMsgConsumer {
             //int i=1/0;
         }catch (Exception e){
             /**报错信息打印日志*/
-            logger.error("群/会议变更消息队列消费异常:"+common.getExceptionMessage(e));
+            logger.error("群/会议变更消息队列消费异常:"+ Common.getExceptionMessage(e));
             try {
                 //发送异常消息回滚到队列，接着消费
                 //channel.basicNack(message.getMessageProperties().getDeliveryTag(), false,false);
             }catch (Exception ex){
                 //报错信息打印日志
-                logger.error(common.getExceptionMessage(ex));
+                logger.error(Common.getExceptionMessage(ex));
             }
 
         }finally {
@@ -131,13 +130,13 @@ public class RabbitMqMsgConsumer {
             //int i=1/0;
         }catch (Exception e){
             /**报错信息打印日志*/
-            logger.error("群/会议审批日志消息队列消费异常:"+common.getExceptionMessage(e));
+            logger.error("群/会议审批日志消息队列消费异常:"+ Common.getExceptionMessage(e));
             try {
                 //发送异常消息回滚到队列，接着消费
                 //channel.basicNack(message.getMessageProperties().getDeliveryTag(), false,false);
             }catch (Exception ex){
                 //报错信息打印日志
-                logger.error(common.getExceptionMessage(ex));
+                logger.error(Common.getExceptionMessage(ex));
             }
 
         }finally {
@@ -151,26 +150,33 @@ public class RabbitMqMsgConsumer {
         try{
             String msg = new String(message.getBody(),"utf-8");
             SocketMsgVo vo = JSONObject.parseObject(msg,SocketMsgVo.class);
-            String userId = vo.getMsg().toString();
+
+            String userId = vo.getMsg().getData().toString();
             List<String> groupList = zzUserGroupService.getGroupByUserId(userId);
             groupList.addAll(zzMeetingUserService.getMeetingByUserId(userId));
             SocketMsgVo vo2 = new SocketMsgVo();
-            vo2.setCode(MessageType.SOCKET_TEAM_UNBIND);
+            vo2.setCode(SocketMsgTypeEnum.BIND_LIST);
+
             SocketTeamListBindVo socketTeamListBindVo = new SocketTeamListBindVo();
             socketTeamListBindVo.setTeamList(groupList);
             socketTeamListBindVo.setUserId(userId);
-            vo2.setMsg(socketTeamListBindVo);
-            rabbitMqMsgProducer.sendSocketTeamListBindMsg(vo2);
-
+            SocketMsgDetailVo detailVo = new SocketMsgDetailVo();
+            detailVo.setCode(SocketMsgDetailTypeEnum.DEFAULT);
+            detailVo.setData(socketTeamListBindVo);
+            vo2.setMsg(detailVo);
+            //如果校验通过才能转发
+            if(Common.checkSocketMsg(vo).getRes()){
+                rabbitMqMsgProducer.sendSocketTeamListBindMsg(vo2);
+            }
         }catch (Exception e){
             logger.error("人员群体信息绑定消息处理报错");
-            logger.error(common.getExceptionMessage(e));
+            logger.error(Common.getExceptionMessage(e));
         }finally {
             try {
                 channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
             } catch (IOException e) {
                 logger.error("人员群体信息绑定消息删除报错");
-                logger.error(common.getExceptionMessage(e));
+                logger.error(Common.getExceptionMessage(e));
             }
         }
     }

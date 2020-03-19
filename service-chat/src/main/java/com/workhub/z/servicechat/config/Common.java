@@ -3,8 +3,7 @@ package com.workhub.z.servicechat.config;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.workhub.z.servicechat.VO.MessageSecretValidVo;
-import com.workhub.z.servicechat.VO.TeamMemberChangeListVo;
+import com.workhub.z.servicechat.VO.*;
 import com.workhub.z.servicechat.entity.config.UserInfo;
 import com.workhub.z.servicechat.entity.config.ZzDictionaryWords;
 import com.workhub.z.servicechat.model.ContactsMessageDto;
@@ -30,8 +29,8 @@ import java.util.*;
 *@Author: 忠
 *@date: 2019/5/14
 */
-public class common {
-    private static Logger log = LoggerFactory.getLogger(common.class);
+public class Common {
+    private static Logger log = LoggerFactory.getLogger(Common.class);
 //  默认图片路径
     public static final String imgUrl = "";
     /**
@@ -818,4 +817,66 @@ public class common {
         vo.setDelList(delList);
         return vo;
     }
+
+    /**
+     * 校验消息合法
+     * @param msg
+     * @return
+     */
+    public static CheckSocketMsgVo checkSocketMsg(Object msg){
+        //先校验消息体本身基本属性
+        CheckSocketMsgVo vo = new CheckSocketMsgVo();
+        Class msgClass = msg.getClass();
+        Class msgVoClass = SocketMsgVo.class;
+        if(msgClass!=msgVoClass){
+            vo.setRes(false);
+            vo.setMsg("消息不合法");
+            log.error(msg.toString());
+            log.error("消息不合法");
+            return  vo;
+        }
+        SocketMsgVo msgVo = (SocketMsgVo)msg;
+        if(msgVo.getCode()==null){
+            vo.setRes(false);
+            vo.setMsg("消息没有编码");
+            log.error("消息没有编码");
+            log.error(msg.toString());
+            return  vo;
+        }
+        Object msgObj = msgVo.getMsg();
+        if(msgObj==null){
+            vo.setRes(false);
+            vo.setMsg("消息没有消息体");
+            log.error("消息没有消息体");
+            log.error(msg.toString());
+            return  vo;
+        }
+        //校验消息内容
+        Class detailClass = msgObj.getClass();
+        Class detailVoClass = SocketMsgDetailVo.class;
+        if(detailVoClass!=detailClass){
+            vo.setRes(false);
+            vo.setMsg("消息体不合法");
+            log.error(msg.toString());
+            log.error("消息体不合法");
+            return  vo;
+        }
+        SocketMsgDetailVo msgDetailVo = (SocketMsgDetailVo)msgObj;
+        if(msgDetailVo.getCode()==null || "".equals(msgDetailVo.getCode())){
+            vo.setRes(false);
+            vo.setMsg("消息体没有编码");
+            log.error("消息体没有编码");
+            log.error(msg.toString());
+            return  vo;
+        }
+        if(msgDetailVo.getData()==null){
+            vo.setRes(false);
+            vo.setMsg("消息体没有消息");
+            log.error("消息体没有消息");
+            log.error(msg.toString());
+            return  vo;
+        }
+        return vo;
+    }
+
 }

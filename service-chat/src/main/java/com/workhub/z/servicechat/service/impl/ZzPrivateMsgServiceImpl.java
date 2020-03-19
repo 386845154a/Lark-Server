@@ -3,8 +3,8 @@ package com.workhub.z.servicechat.service.impl;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.workhub.z.servicechat.VO.PrivateFileVO;
-import com.workhub.z.servicechat.config.common;
+import com.workhub.z.servicechat.VO.PrivateFileVo;
+import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.dao.ZzPrivateMsgDao;
 import com.workhub.z.servicechat.service.ZzPrivateMsgService;
 import org.slf4j.Logger;
@@ -27,13 +27,13 @@ public class ZzPrivateMsgServiceImpl implements ZzPrivateMsgService {
     private ZzPrivateMsgDao zzPrivateMsgDao;
     @Override
     //query 查询附件名称
-    public TableResultResponse<PrivateFileVO> getFileList(String userId,String receiverId,String query, int page, int size) throws Exception {
+    public TableResultResponse<PrivateFileVo> getFileList(String userId, String receiverId, String query, int page, int size) throws Exception {
         PageHelper.startPage(page, size);
-        List<PrivateFileVO> dataList =this.zzPrivateMsgDao.getFileList(userId,receiverId,query);
+        List<PrivateFileVo> dataList =this.zzPrivateMsgDao.getFileList(userId,receiverId,query);
         //null的String类型属性转换空字符串
-        common.putVoNullStringToEmptyString(dataList);
-        PageInfo<PrivateFileVO> pageInfo = new PageInfo<>(dataList);
-        TableResultResponse<PrivateFileVO> res = new TableResultResponse<PrivateFileVO>(
+        Common.putVoNullStringToEmptyString(dataList);
+        PageInfo<PrivateFileVo> pageInfo = new PageInfo<>(dataList);
+        TableResultResponse<PrivateFileVo> res = new TableResultResponse<PrivateFileVo>(
                 pageInfo.getPageSize(),
                 pageInfo.getPageNum(),
                 pageInfo.getPages(),

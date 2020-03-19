@@ -78,9 +78,6 @@ public class RabbitConfig {
     /*群体消息（群，会议，系统通知等等）*/
     public static final String ROUTINGKEY_SOCKET_TEAM_MSG = "routingkey_socket_team_msg";
     public static final String QUEUE_SOCKET_TEAM_MSG  = "queue_socket_team_msg";
-    /*消息应答*/
-    public static final String ROUTINGKEY_SOCKET_MSG_ANSWER = "routingkey_socket_msg_answer";
-    public static final String QUEUE_SOCKET_MSG_ANSWER  = "queue_socket_msg_answer";
     /*私人消息*/
     public static final String ROUTINGKEY_SOCKET_PRIVATE_MSG = "routingkey_socket_private_msg";
     public static final String QUEUE_SOCKET_PRIVATE_MSG  = "queue_socket_private_msg";
@@ -198,15 +195,6 @@ public class RabbitConfig {
     @Bean
     public Binding socketTeamMsgBinding() {
         return BindingBuilder.bind(socketTeamMsg()).to(SocketExchange()).with(RabbitConfig.ROUTINGKEY_SOCKET_TEAM_MSG );
-    }
-    /*消息应答*/
-    @Bean
-    public Queue socketMsgAnswer() {
-        return new Queue(QUEUE_SOCKET_MSG_ANSWER , true); //队列持久
-    }
-    @Bean
-    public Binding socketMsgAnswerBinding() {
-        return BindingBuilder.bind(socketMsgAnswer()).to(SocketExchange()).with(RabbitConfig.ROUTINGKEY_SOCKET_MSG_ANSWER );
     }
     /*私聊消息*/
     @Bean

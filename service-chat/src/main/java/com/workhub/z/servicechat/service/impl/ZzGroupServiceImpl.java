@@ -10,10 +10,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.base.Joiner;
 import com.workhub.z.servicechat.VO.*;
-import com.workhub.z.servicechat.config.CacheConst;
-import com.workhub.z.servicechat.config.MessageType;
-import com.workhub.z.servicechat.config.RandomId;
-import com.workhub.z.servicechat.config.common;
+import com.workhub.z.servicechat.config.*;
 import com.workhub.z.servicechat.dao.ZzGroupDao;
 import com.workhub.z.servicechat.dao.ZzUserGroupDao;
 import com.workhub.z.servicechat.entity.group.ZzGroup;
@@ -44,7 +41,7 @@ import java.util.stream.Collectors;
 import static com.workhub.z.servicechat.config.MessageType.HIGH_SECRECT_LEVEL;
 import static com.workhub.z.servicechat.config.MessageType.NORMAL_SECRECT_LEVEL;
 import static com.workhub.z.servicechat.config.RandomId.getUUID;
-import static com.workhub.z.servicechat.config.common.putEntityNullToEmptyString;
+import static com.workhub.z.servicechat.config.Common.putEntityNullToEmptyString;
 
 /**
  * 群组表(ZzGroup)表服务实现类
@@ -234,9 +231,9 @@ public class ZzGroupServiceImpl implements ZzGroupService {
                 ids.setLength(ids.length()-1);
             }
             //测试使用，给前端返回测试数据
-           /* List<UserInfoVO> data=new ArrayList<>();
+           /* List<UserInfoVo> data=new ArrayList<>();
             for(int i=0;i<5;i++){
-                UserInfoVO vo=new UserInfoVO();
+                UserInfoVo vo=new UserInfoVo();
                 vo.setId("id"+i);
                 vo.setName("name"+i);
                 vo.setOnline((i%2)+"");
@@ -250,20 +247,20 @@ public class ZzGroupServiceImpl implements ZzGroupService {
     //param:page 页码 size 每页几条;group_name群组名称；creator创建人姓名；level密级；
     // dateBegin创建时间开始；dateEnd创建时间结束；pname项目名称；isclose是否关闭
     @Override
-    public TableResultResponse<GroupVO> groupListMonitoring(Map<String,String> params) throws Exception{
-        int page=Integer.valueOf(common.nulToEmptyString(params.get("page")));
-        int size=Integer.valueOf(common.nulToEmptyString(params.get("size")));
+    public TableResultResponse<GroupVo> groupListMonitoring(Map<String,String> params) throws Exception{
+        int page=Integer.valueOf(Common.nulToEmptyString(params.get("page")));
+        int size=Integer.valueOf(Common.nulToEmptyString(params.get("size")));
         PageHelper.startPage(page, size);
-        List<GroupVO> dataList =this.zzGroupDao.groupListMonitoring(params);
+        List<GroupVo> dataList =this.zzGroupDao.groupListMonitoring(params);
         //null的String类型属性转换空字符串
-        common.putVoNullStringToEmptyString(dataList);
+        Common.putVoNullStringToEmptyString(dataList);
         AdminUser userInfo=null;
-        for(GroupVO groupVO:dataList){
-            userInfo=iUserService.getUserInfo(common.nulToEmptyString(groupVO.getCreator()));
+        for(GroupVo groupVO:dataList){
+            userInfo=iUserService.getUserInfo(Common.nulToEmptyString(groupVO.getCreator()));
             groupVO.setCreatorName(userInfo==null?"":userInfo.getName());
         }
-        PageInfo<GroupVO> pageInfo = new PageInfo<>(dataList);
-        TableResultResponse<GroupVO> res = new TableResultResponse<GroupVO>(
+        PageInfo<GroupVo> pageInfo = new PageInfo<>(dataList);
+        TableResultResponse<GroupVo> res = new TableResultResponse<GroupVo>(
                 pageInfo.getPageSize(),
                 pageInfo.getPageNum(),
                 pageInfo.getPages(),
@@ -310,7 +307,7 @@ public class ZzGroupServiceImpl implements ZzGroupService {
             }
         } catch (Exception e) {
             log.error("解散取处理redis缓存报错！！！");
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
 
         //处理缓存end
@@ -371,9 +368,9 @@ public class ZzGroupServiceImpl implements ZzGroupService {
             List<String> userList = zzGroupDao.queryGroupUserIdListByGroupId(groupId);
             List<String> nowUserList =  new ArrayList<>();
             for(GroupEditUserList nowUser :userListDtos){
-                nowUserList.add(common.nulToEmptyString(nowUser.getId()));
+                nowUserList.add(Common.nulToEmptyString(nowUser.getId()));
             }
-            TeamMemberChangeListVo memberChangeListVo = common.teamMemberChangeInf(userList,nowUserList);
+            TeamMemberChangeListVo memberChangeListVo = Common.teamMemberChangeInf(userList,nowUserList);
             List<String> addUserList = memberChangeListVo.getAddList();
             List<String> delUserList = memberChangeListVo.getDelList();
             //处理群成员begin
@@ -416,15 +413,22 @@ public class ZzGroupServiceImpl implements ZzGroupService {
 
                 }
                 SocketMsgVo msgVo = new SocketMsgVo();
-                msgVo.setCode(MessageType.SOCKET_TEAM_BIND);
+                msgVo.setCode(SocketMsgTypeEnum.BIND_USER);
                 msgVo.setSender("");
                 msgVo.setReceiver("");
                 SocketTeamBindVo socketTeamBindVo  = new SocketTeamBindVo();
                 socketTeamBindVo.setTeamId(groupId);
                 socketTeamBindVo.setUserList(msgUserList);
-                msgVo.setMsg(socketTeamBindVo);
-                rabbitMqMsgProducer.sendSocketTeamBindMsg(msgVo);
-
+                SocketMsgDetailVo detailVo = new SocketMsgDetailVo();
+                detailVo.setCode(SocketMsgDetailTypeEnum.DEFAULT);
+                detailVo.setData(socketTeamBindVo);
+                msgVo.setMsg(detailVo);
+                //校验消息
+                CheckSocketMsgVo cRes = Common.checkSocketMsg(msgVo);
+                //只有消息合法才去绑定socket通信频道
+                if(cRes.getRes()){
+                    rabbitMqMsgProducer.sendSocketTeamBindMsg(msgVo);
+                }
                 //记录群状态变动begin
                 if(!userNames.equals("")){
                     userNames = userNames.substring(1);
@@ -467,15 +471,22 @@ public class ZzGroupServiceImpl implements ZzGroupService {
 
                 }
                 SocketMsgVo msgVo2 = new SocketMsgVo();
-                msgVo2.setCode(MessageType.SOCKET_TEAM_UNBIND);
+                msgVo2.setCode(SocketMsgTypeEnum.UNBIND_USER);
                 msgVo2.setSender("");
                 msgVo2.setReceiver("");
                 SocketTeamBindVo socketTeamBindVo2  = new SocketTeamBindVo();
                 socketTeamBindVo2.setTeamId(groupId);
                 socketTeamBindVo2.setUserList(msgUserList2);
-                msgVo2.setMsg(socketTeamBindVo2);
-                rabbitMqMsgProducer.sendSocketTeamUnBindMsg(msgVo2);
-
+                SocketMsgDetailVo detailVo = new SocketMsgDetailVo();
+                detailVo.setCode(SocketMsgDetailTypeEnum.DEFAULT);
+                detailVo.setData(socketTeamBindVo2);
+                msgVo2.setMsg(detailVo);
+                //校验消息
+                CheckSocketMsgVo cRes = Common.checkSocketMsg(msgVo2);
+                //只有消息合法才去绑定socket通信频道
+                if(cRes.getRes()){
+                    rabbitMqMsgProducer.sendSocketTeamUnBindMsg(msgVo2);
+                }
                 //记录群状态变动begin
                 if(!userNames.equals("")){
                     userNames = userNames.substring(1);
@@ -498,7 +509,7 @@ public class ZzGroupServiceImpl implements ZzGroupService {
             }
         } catch (Exception e) {
             log.error("编辑群组人员出错！！！");
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             if(addUserInfoList!=null){
                 for (AdminUser userInfo:addUserInfoList){
@@ -562,8 +573,8 @@ public class ZzGroupServiceImpl implements ZzGroupService {
             zzGroupInfo.setGroupOwnerId(jsonObject.getString("creator"));
             AdminUser userInfo = iUserService.getUserInfo(jsonObject.getString("creator"));
             if(userInfo!=null){
-                zzGroupInfo.setCreatorName(common.nulToEmptyString(userInfo.getName()));
-                zzGroupInfo.setGroupOwnerName(common.nulToEmptyString(userInfo.getName()));
+                zzGroupInfo.setCreatorName(Common.nulToEmptyString(userInfo.getName()));
+                zzGroupInfo.setGroupOwnerName(Common.nulToEmptyString(userInfo.getName()));
             }
             zzGroupInfo.setGroupDescribe(jsonObject.getString("groupDescribe"));
             zzGroupInfo.setUpdator(jsonObject.getString("updator"));
@@ -576,9 +587,9 @@ public class ZzGroupServiceImpl implements ZzGroupService {
             zzGroupInfo.setCreateTime(new Date());
             zzGroupInfo.setUpdateTime(new Date());
             //根据全部人员生成群组头像
-            zzGroupInfo.setGroupImg(common.imgUrl);
+            zzGroupInfo.setGroupImg(Common.imgUrl);
             // groupService.insert(zzGroupInfo);//创建讨论组
-            zzGroupInfo.setIscross(common.nulToEmptyString(jsonObject.getString("groupType")));
+            zzGroupInfo.setIscross(Common.nulToEmptyString(jsonObject.getString("groupType")));
 
             this.insert(zzGroupInfo);//创建讨论组
             //创建群end
@@ -611,14 +622,14 @@ public class ZzGroupServiceImpl implements ZzGroupService {
                     }
                 } catch (Exception e) {
                     log.error("创建群redis报错！！！");
-                    log.error(common.getExceptionMessage(e));
+                    log.error(Common.getExceptionMessage(e));
                 }
             }
             // TODO: 2019/6/3 群头像生成
 
         }catch (Exception e){
             log.error("创建研讨群组出错");
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
             res.rel(false);
             res.data("系统出错");
             /*//手动回滚事务*/

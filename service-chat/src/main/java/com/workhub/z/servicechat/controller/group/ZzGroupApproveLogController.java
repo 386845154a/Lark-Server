@@ -2,7 +2,7 @@ package com.workhub.z.servicechat.controller.group;
 
 import com.github.hollykunge.security.common.msg.ObjectRestResponse;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
-import com.workhub.z.servicechat.config.common;
+import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.entity.group.ZzGroupApproveLog;
 import com.workhub.z.servicechat.service.ZzGroupApproveLogService;
 import org.slf4j.Logger;
@@ -31,8 +31,8 @@ public class ZzGroupApproveLogController {
     //新增接口
     @PostMapping("/add")
     public ObjectRestResponse add(@RequestBody ZzGroupApproveLog zzGroupApproveLog) throws Exception{
-        String userId = common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String userId = Common.nulToEmptyString(request.getHeader("userId"));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
         ObjectRestResponse objectRestResponse = new ObjectRestResponse();
         objectRestResponse.rel(true);
         objectRestResponse.msg("200");
@@ -46,8 +46,8 @@ public class ZzGroupApproveLogController {
     //type 0群日志1会议日志
     @GetMapping("/getApproveLogInf")
     public TableResultResponse getApproveLogInf(@RequestParam Map params) throws Exception{
-        String userId = common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String userId = Common.nulToEmptyString(request.getHeader("userId"));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
         return this.zzGroupApproveLogService.getApproveLogInf(params);
     }
 }

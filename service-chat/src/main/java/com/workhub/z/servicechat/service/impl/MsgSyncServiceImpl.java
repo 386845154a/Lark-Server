@@ -1,7 +1,7 @@
 package com.workhub.z.servicechat.service.impl;
 
 import com.github.hollykunge.security.admin.api.dto.AdminUser;
-import com.workhub.z.servicechat.config.common;
+import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.dao.MsgSyncDao;
 import com.workhub.z.servicechat.dao.ZzContactDao;
 import com.workhub.z.servicechat.entity.ZzContactInf;
@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -69,10 +68,10 @@ public class MsgSyncServiceImpl implements MsgSyncService {
                      //会议、群、私聊
                      type = zzMessageInfo.getType();
                     //解析消息，把json数据放到字段里
-                    zzMessageInfo.setFrontId(common.nulToEmptyString(common.getJsonStringKeyValue(message,"id")));
-                    zzMessageInfo.setFileType(common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.type")));
-                    zzMessageInfo.setMsg(common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.title")));
-                    zzMessageInfo.setFileId(common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.id")));
+                    zzMessageInfo.setFrontId(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"id")));
+                    zzMessageInfo.setFileType(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.type")));
+                    zzMessageInfo.setMsg(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.title")));
+                    zzMessageInfo.setFileId(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.id")));
                     //同步消息到数据库
                     this.msgSyncDao.syncMsg(zzMessageInfo);
                     //设置同步标记
@@ -84,18 +83,18 @@ public class MsgSyncServiceImpl implements MsgSyncService {
                         zzContactInfSender = new ZzContactInf();
                         zzContactInfSender.setId(sender);
                         zzContactInfSender.setType("USER");
-                        zzContactInfSender.setAvartar(common.nulToEmptyString(common.getJsonStringKeyValue(message, "avatar")));
-                        zzContactInfSender.setName(common.nulToEmptyString(common.getJsonStringKeyValue(message, "username")));
+                        zzContactInfSender.setAvartar(Common.nulToEmptyString(Common.getJsonStringKeyValue(message, "avatar")));
+                        zzContactInfSender.setName(Common.nulToEmptyString(Common.getJsonStringKeyValue(message, "username")));
                         zzContactInfSender.setMemberNum("2");
                         zzContactInfSender.setGroupOwner("");
                         AdminUser userSenderInf = this.iUserService.getUserInfo(sender);
                         if (userSenderInf == null) {
                             userSenderInf = new AdminUser();
-                            common.putVoNullStringToEmptyString(userSenderInf);
+                            Common.putVoNullStringToEmptyString(userSenderInf);
                         }
                         zzContactInfSender.setLevels(userSenderInf.getSecretLevel());
                         zzContactInfSender.setPid(userSenderInf.getPId());
-                        common.putVoNullStringToEmptyString(zzContactInfSender);
+                        Common.putVoNullStringToEmptyString(zzContactInfSender);
                         this.zzContactDao.add(zzContactInfSender);
                     }
                     String receiverCnt = this.zzContactDao.countsById(receiver);
@@ -104,18 +103,18 @@ public class MsgSyncServiceImpl implements MsgSyncService {
                         zzContactInfReceiver = new ZzContactInf();
                         zzContactInfReceiver.setId(receiver);
                         zzContactInfReceiver.setType(type);
-                        zzContactInfReceiver.setName(common.nulToEmptyString(common.getJsonStringKeyValue(message, "toName")));
+                        zzContactInfReceiver.setName(Common.nulToEmptyString(Common.getJsonStringKeyValue(message, "toName")));
                         if ("GROUP".equals(type) || "MEET".equals(type)) {
-                            zzContactInfReceiver.setAvartar(common.nulToEmptyString(common.getJsonStringKeyValue(message, "contactInfo.avatar")));
-                            zzContactInfReceiver.setLevels(common.nulToEmptyString(common.getJsonStringKeyValue(message, "contactInfo.secretLevel")));
+                            zzContactInfReceiver.setAvartar(Common.nulToEmptyString(Common.getJsonStringKeyValue(message, "contactInfo.avatar")));
+                            zzContactInfReceiver.setLevels(Common.nulToEmptyString(Common.getJsonStringKeyValue(message, "contactInfo.secretLevel")));
                             zzContactInfReceiver.setPid("");
-                            zzContactInfReceiver.setMemberNum(common.nulToEmptyString(common.getJsonStringKeyValue(message, "contactInfo.memberNum")));
-                            zzContactInfReceiver.setGroupOwner(common.nulToEmptyString(common.getJsonStringKeyValue(message, "contactInfo.groupOwnerId")));
+                            zzContactInfReceiver.setMemberNum(Common.nulToEmptyString(Common.getJsonStringKeyValue(message, "contactInfo.memberNum")));
+                            zzContactInfReceiver.setGroupOwner(Common.nulToEmptyString(Common.getJsonStringKeyValue(message, "contactInfo.groupOwnerId")));
                         } else if ("USER".equals(type)) {
                             AdminUser userReceiverInf = this.iUserService.getUserInfo(receiver);
                             if (userReceiverInf == null) {
                                 userReceiverInf = new AdminUser();
-                                common.putVoNullStringToEmptyString(userReceiverInf);
+                                Common.putVoNullStringToEmptyString(userReceiverInf);
                             }
                             zzContactInfReceiver.setLevels(userReceiverInf.getSecretLevel());
                             zzContactInfReceiver.setPid(userReceiverInf.getPId());
@@ -123,7 +122,7 @@ public class MsgSyncServiceImpl implements MsgSyncService {
                             zzContactInfReceiver.setGroupOwner("");
                             zzContactInfReceiver.setMemberNum("2");
                         }
-                        common.putVoNullStringToEmptyString(zzContactInfReceiver);
+                        Common.putVoNullStringToEmptyString(zzContactInfReceiver);
                         this.zzContactDao.add(zzContactInfReceiver);
 
                     }
@@ -141,7 +140,7 @@ public class MsgSyncServiceImpl implements MsgSyncService {
             if(zzMessageInfo!=null && zzMessageInfo.getMsgId()!=null){
                 log.error("msg id is "+zzMessageInfo.getMsgId()+"-----------------------------");
             }
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
             return 0;
         }finally {
             synGoing = false;

@@ -5,10 +5,7 @@ import com.github.hollykunge.security.admin.api.dto.AdminUser;
 import com.github.hollykunge.security.common.msg.ListRestResponse;
 import com.google.common.base.Joiner;
 import com.workhub.z.servicechat.VO.*;
-import com.workhub.z.servicechat.config.CacheConst;
-import com.workhub.z.servicechat.config.MessageType;
-import com.workhub.z.servicechat.config.RandomId;
-import com.workhub.z.servicechat.config.common;
+import com.workhub.z.servicechat.config.*;
 import com.workhub.z.servicechat.dao.ZzMeetingUserDao;
 import com.workhub.z.servicechat.entity.group.ZzGroupStatus;
 import com.workhub.z.servicechat.entity.meeting.ZzMeetingUser;
@@ -55,9 +52,9 @@ public class ZzMeetingUserServiceImpl implements ZzMeetingUserService {
             if(zzMeetingUser.getCanMsg()==null || "".equals(zzMeetingUser.getCanMsg())){
                 zzMeetingUser.setCanMsg(canMsg);
             }
-            common.putVoNullStringToEmptyString(zzMeetingUser);
+            Common.putVoNullStringToEmptyString(zzMeetingUser);
         }catch (Exception e){
-            logger.error(common.getExceptionMessage(e));
+            logger.error(Common.getExceptionMessage(e));
         }
         return this.zzMeetingUserDao.addUser(zzMeetingUser);
     }
@@ -79,33 +76,33 @@ public class ZzMeetingUserServiceImpl implements ZzMeetingUserService {
         List<MeetUserVo> meetUserList = new ArrayList<>();
         for(Map map : oriList){
             MeetUserVo meetUserVo = new MeetUserVo();
-            AdminUser userInfo = iUserService.getUserInfo(common.nulToEmptyString(map.get("USERID")));
+            AdminUser userInfo = iUserService.getUserInfo(Common.nulToEmptyString(map.get("USERID")));
             if(userInfo == null ){
                 userInfo = new AdminUser();
             }
-            meetUserVo.setUserId(common.nulToEmptyString(map.get("USERID")));
-            meetUserVo.setUserName(common.nulToEmptyString(map.get("USERNAME")));
-            meetUserVo.setUserNo(common.nulToEmptyString(map.get("USERNO")));
-            meetUserVo.setUserRoleCode(common.nulToEmptyString(map.get("ROLECODE")));
-            meetUserVo.setUserRoleName(common.nulToEmptyString(map.get("ROLENAME")));
-            meetUserVo.setJoinTime(common.nulToEmptyString(map.get("CRTTIME")));
-            meetUserVo.setUserLevel(common.nulToEmptyString(map.get("USERLEVEL")));
-            meetUserVo.setCanMsg(common.nulToEmptyString(map.get("CANMSG")));
-            String online = common.nulToEmptyString(RedisUtil.getValue(CacheConst.userOnlineCahce+common.nulToEmptyString(map.get("USERID"))));
+            meetUserVo.setUserId(Common.nulToEmptyString(map.get("USERID")));
+            meetUserVo.setUserName(Common.nulToEmptyString(map.get("USERNAME")));
+            meetUserVo.setUserNo(Common.nulToEmptyString(map.get("USERNO")));
+            meetUserVo.setUserRoleCode(Common.nulToEmptyString(map.get("ROLECODE")));
+            meetUserVo.setUserRoleName(Common.nulToEmptyString(map.get("ROLENAME")));
+            meetUserVo.setJoinTime(Common.nulToEmptyString(map.get("CRTTIME")));
+            meetUserVo.setUserLevel(Common.nulToEmptyString(map.get("USERLEVEL")));
+            meetUserVo.setCanMsg(Common.nulToEmptyString(map.get("CANMSG")));
+            String online = Common.nulToEmptyString(RedisUtil.getValue(CacheConst.userOnlineCahce+ Common.nulToEmptyString(map.get("USERID"))));
             meetUserVo.setOnline((MessageType.ONLINE+"").equals(online)?"1":")");
-            meetUserVo.setUserLevel(common.nulToEmptyString(userInfo.getSecretLevel()));
-            meetUserVo.setUserImg(common.nulToEmptyString(userInfo.getAvatar()));
-            meetUserVo.setUserOrgCode(common.nulToEmptyString(userInfo.getOrgCode()));
-            meetUserVo.setUserOrgName(common.nulToEmptyString(userInfo.getOrgName()));
-            meetUserVo.setPathName(common.nulToEmptyString(userInfo.getPathName()));
+            meetUserVo.setUserLevel(Common.nulToEmptyString(userInfo.getSecretLevel()));
+            meetUserVo.setUserImg(Common.nulToEmptyString(userInfo.getAvatar()));
+            meetUserVo.setUserOrgCode(Common.nulToEmptyString(userInfo.getOrgCode()));
+            meetUserVo.setUserOrgName(Common.nulToEmptyString(userInfo.getOrgName()));
+            meetUserVo.setPathName(Common.nulToEmptyString(userInfo.getPathName()));
             meetUserList.add(meetUserVo);
         }
         try {
-            common.putVoNullStringToEmptyString(meetUserList);
+            Common.putVoNullStringToEmptyString(meetUserList);
             //排序 在线排在前面
             meetUserList = meetUserList.stream().sorted(Comparator.comparing(MeetUserVo::getOnline).reversed()).collect(Collectors.toList());
         }catch (Exception e){
-            logger.error(common.getExceptionMessage(e));
+            logger.error(Common.getExceptionMessage(e));
         }
         return meetUserList;
     }
@@ -141,10 +138,10 @@ public class ZzMeetingUserServiceImpl implements ZzMeetingUserService {
             }
         }
         try {
-            common.putVoNullStringToEmptyString(users);
+            Common.putVoNullStringToEmptyString(users);
         }catch (Exception e){
             logger.error("批量添加成员出错");
-            logger.error(common.getExceptionMessage(e));
+            logger.error(Common.getExceptionMessage(e));
         }
         int i = this.zzMeetingUserDao.addListUsers(users);
         return i;
@@ -211,13 +208,13 @@ public class ZzMeetingUserServiceImpl implements ZzMeetingUserService {
             }
             List<String> userListStr = new ArrayList<>();
             for(MeetUserVo vo:beforeUserList){
-                userListStr.add(common.nulToEmptyString(vo.getUserId()));
+                userListStr.add(Common.nulToEmptyString(vo.getUserId()));
             }
             List<String> nowUserListStr = new ArrayList<>();
             for(MeetUserVo vo:nowUserList){
-                nowUserListStr.add(common.nulToEmptyString(vo.getUserId()));
+                nowUserListStr.add(Common.nulToEmptyString(vo.getUserId()));
             }
-            TeamMemberChangeListVo memberChangeListVo = common.teamMemberChangeInf(userListStr,nowUserListStr);
+            TeamMemberChangeListVo memberChangeListVo = Common.teamMemberChangeInf(userListStr,nowUserListStr);
             List<String> addUserList = memberChangeListVo.getAddList();
             List<String> delUserList = memberChangeListVo.getDelList();
             //处理群成员begin
@@ -283,15 +280,22 @@ public class ZzMeetingUserServiceImpl implements ZzMeetingUserService {
 
                 }
                 SocketMsgVo msgVo = new SocketMsgVo();
-                msgVo.setCode(MessageType.SOCKET_TEAM_BIND);
+                msgVo.setCode(SocketMsgTypeEnum.BIND_USER);
                 msgVo.setSender("");
                 msgVo.setReceiver("");
                 SocketTeamBindVo socketTeamBindVo  = new SocketTeamBindVo();
                 socketTeamBindVo.setTeamId(meetId);
                 socketTeamBindVo.setUserList(msgUserList);
-                msgVo.setMsg(socketTeamBindVo);
-                rabbitMqMsgProducer.sendSocketTeamBindMsg(msgVo);
-
+                SocketMsgDetailVo detailVo = new SocketMsgDetailVo();
+                detailVo.setCode(SocketMsgDetailTypeEnum.DEFAULT);
+                detailVo.setData(socketTeamBindVo);
+                msgVo.setMsg(detailVo);
+                //校验消息
+                CheckSocketMsgVo cRes = Common.checkSocketMsg(msgVo);
+                //只有消息合法才去绑定socket通信频道
+                if(cRes.getRes()){
+                    rabbitMqMsgProducer.sendSocketTeamBindMsg(msgVo);
+                }
                 //记录群状态变动begin
                 if(!userNames.equals("")){
                     userNames = userNames.substring(1);
@@ -335,14 +339,22 @@ public class ZzMeetingUserServiceImpl implements ZzMeetingUserService {
 
                 }
                 SocketMsgVo msgVo2 = new SocketMsgVo();
-                msgVo2.setCode(MessageType.SOCKET_TEAM_UNBIND);
+                msgVo2.setCode(SocketMsgTypeEnum.UNBIND_USER);
                 msgVo2.setSender("");
                 msgVo2.setReceiver("");
                 SocketTeamBindVo socketTeamBindVo2  = new SocketTeamBindVo();
                 socketTeamBindVo2.setTeamId(meetId);
                 socketTeamBindVo2.setUserList(msgUserList2);
-                msgVo2.setMsg(socketTeamBindVo2);
-                rabbitMqMsgProducer.sendSocketTeamUnBindMsg(msgVo2);
+                SocketMsgDetailVo detailVo = new SocketMsgDetailVo();
+                detailVo.setData(SocketMsgDetailTypeEnum.DEFAULT);
+                detailVo.setData(socketTeamBindVo2);
+                msgVo2.setMsg(detailVo);
+                //校验消息
+                CheckSocketMsgVo cRes = Common.checkSocketMsg(msgVo2);
+                //只有消息合法才去绑定socket通信频道
+                if(cRes.getRes()){
+                    rabbitMqMsgProducer.sendSocketTeamUnBindMsg(msgVo2);
+                }
                 //记录群状态变动begin
                 if(!userNames.equals("")){
                     userNames = userNames.substring(1);
@@ -365,7 +377,7 @@ public class ZzMeetingUserServiceImpl implements ZzMeetingUserService {
             }
         } catch (Exception e) {
             logger.error("编辑会议人员出错!!!");
-            logger.error(common.getExceptionMessage(e));
+            logger.error(Common.getExceptionMessage(e));
             //事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             if(addUserInfoList!=null){

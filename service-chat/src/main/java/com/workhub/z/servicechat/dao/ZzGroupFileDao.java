@@ -1,6 +1,6 @@
 package com.workhub.z.servicechat.dao;
 
-import com.workhub.z.servicechat.VO.FileMonitoringVO;
+import com.workhub.z.servicechat.VO.FileMonitoringVo;
 import com.workhub.z.servicechat.VO.GroupFileVo;
 import com.workhub.z.servicechat.entity.group.ZzGroupFile;
 import org.apache.ibatis.annotations.Param;
@@ -68,7 +68,7 @@ public interface ZzGroupFileDao extends Mapper<ZzGroupFile> {
      */
     int deleteById(String fileId);
 
-    //List<GroupInfoVO> groupFileList(@Param("id") String id, @Param("start") Integer start, @Param("end") Integer end);
+    //List<GroupInfoVo> groupFileList(@Param("id") String id, @Param("start") Integer start, @Param("end") Integer end);
 
     Long groupFileListTotal(@Param("id")String id);
 
@@ -91,7 +91,7 @@ public interface ZzGroupFileDao extends Mapper<ZzGroupFile> {
     int fileRecord(@Param("param") ZzGroupFile zzUploadFile);
     //文件信息补全
     int fileUpdate(@Param("param") ZzGroupFile zzUploadFile);
-    List<FileMonitoringVO> fileMonitoring(@Param("params")  Map<String,Object> param);
+    List<FileMonitoringVo> fileMonitoring(@Param("params")  Map<String,Object> param);
 
     int setFileApproveFLg(@Param("params") List<Map<String,String>> params);
     /**

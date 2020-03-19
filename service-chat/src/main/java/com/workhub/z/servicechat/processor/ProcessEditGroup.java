@@ -2,15 +2,12 @@ package com.workhub.z.servicechat.processor;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.hollykunge.security.admin.api.dto.AdminUser;
-import com.workhub.z.servicechat.VO.GroupEditVO;
-import com.workhub.z.servicechat.VO.MsgSendStatusVo;
-import com.workhub.z.servicechat.VO.SocketMsgVo;
-import com.workhub.z.servicechat.VO.SocketTeamBindVo;
+import com.workhub.z.servicechat.VO.*;
+import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.config.ImageUtil;
-import com.workhub.z.servicechat.config.MessageType;
-import com.workhub.z.servicechat.config.common;
+import com.workhub.z.servicechat.config.SocketMsgDetailTypeEnum;
+import com.workhub.z.servicechat.config.SocketMsgTypeEnum;
 import com.workhub.z.servicechat.entity.group.ZzGroup;
 import com.workhub.z.servicechat.entity.group.ZzUserGroup;
 import com.workhub.z.servicechat.feign.IUserService;
@@ -28,11 +25,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
+import static com.workhub.z.servicechat.config.Common.imgUrl;
 import static com.workhub.z.servicechat.config.MessageType.*;
 import static com.workhub.z.servicechat.config.RandomId.getUUID;
-import static com.workhub.z.servicechat.config.common.imgUrl;
 
 @Service
 public class ProcessEditGroup extends AbstractMsgProcessor {
@@ -101,7 +100,7 @@ public class ProcessEditGroup extends AbstractMsgProcessor {
 //        }
         //todo 改成socket代码规范
         SocketMsgVo msgVo = new SocketMsgVo();
-        msgVo.setCode(MessageType.SOCKET_TEAM_BIND);
+        msgVo.setCode(SocketMsgTypeEnum.BIND_USER);
         msgVo.setSender("");
         msgVo.setReceiver("");
         SocketTeamBindVo socketTeamBindVo  = new SocketTeamBindVo();
@@ -109,7 +108,17 @@ public class ProcessEditGroup extends AbstractMsgProcessor {
         List userList = new ArrayList();
         userList.add(userId);
         socketTeamBindVo.setUserList(userList);
-        msgVo.setMsg(socketTeamBindVo);
+        SocketMsgDetailVo detailVo = new SocketMsgDetailVo();
+        detailVo.setCode(SocketMsgDetailTypeEnum.DEFAULT);
+        detailVo.setData(socketTeamBindVo);
+        msgVo.setMsg(detailVo);
+        //校验消息
+        CheckSocketMsgVo cRes = Common.checkSocketMsg(msgVo);
+        if(!cRes.getRes()){
+            msgSendStatusVo.setStatus(false);
+            msgSendStatusVo.setContent("群体绑定消息不合法");
+            return msgSendStatusVo;
+        }
         //todo SocketMsgVo加密
         rabbitMqMsgProducer.sendSocketTeamBindMsg(msgVo);
 
@@ -124,7 +133,7 @@ public class ProcessEditGroup extends AbstractMsgProcessor {
             userGroup.setUserId(userInfo.getUserId());
             userGroupService.insert(userGroup);
 
-            GroupEditVO groupEditVO = new GroupEditVO();
+            GroupEditVo groupEditVO = new GroupEditVo();
             groupTaskDto.setType(GROUP_INVITE_MSG);
             groupEditVO.setCode(GROUP_EDIT);
             groupTaskDto.setUserList(null);
@@ -168,8 +177,8 @@ public class ProcessEditGroup extends AbstractMsgProcessor {
         zzGroupInfo.setGroupOwnerId(groupJson.getString("creator"));
         AdminUser userInfo = iUserService.getUserInfo(groupJson.getString("creator"));
         if(userInfo!=null){
-            zzGroupInfo.setCreatorName(common.nulToEmptyString(userInfo.getName()));
-            zzGroupInfo.setGroupOwnerName(common.nulToEmptyString(userInfo.getName()));
+            zzGroupInfo.setCreatorName(Common.nulToEmptyString(userInfo.getName()));
+            zzGroupInfo.setGroupOwnerName(Common.nulToEmptyString(userInfo.getName()));
         }
         zzGroupInfo.setGroupDescribe(groupJson.getString("groupDescribe"));
         zzGroupInfo.setUpdator(groupJson.getString("updator"));
@@ -183,9 +192,9 @@ public class ProcessEditGroup extends AbstractMsgProcessor {
         zzGroupInfo.setUpdateTime(new Date());
 //      根据全部人员生成群组头像
         zzGroupInfo.setGroupImg(imgUrl);
-        zzGroupInfo.setIscross(common.nulToEmptyString(groupJson.getString("groupType")));
+        zzGroupInfo.setIscross(Common.nulToEmptyString(groupJson.getString("groupType")));
 
-        GroupEditVO groupEditVO = JSONObject.parseObject(msg, GroupEditVO.class);
+        //GroupEditVo groupEditVO = JSONObject.parseObject(msg, GroupEditVo.class);
         GroupTaskDto groupTaskDto = JSONObject.parseObject(message, GroupTaskDto.class);
         List<UserListDto> userList = new ArrayList<UserListDto>();
         groupTaskDto.setType(GROUP_INVITE_MSG);
@@ -204,15 +213,20 @@ public class ProcessEditGroup extends AbstractMsgProcessor {
             userListDto.setImg(userJson.getString("img"));
             userList.add(userListDto);
             groupTaskDto.setReviser(userJson.getString("userId"));
-            groupEditVO.setCode(GROUP_EDIT);
+            /*groupEditVO.setCode(GROUP_EDIT);
             groupEditVO.setData(groupTaskDto);
-            String res = JSONObject.toJSONString(groupEditVO, SerializerFeature.DisableCircularReferenceDetect);
+            String res = JSONObject.toJSONString(groupEditVO, SerializerFeature.DisableCircularReferenceDetect);*/
 
             SocketMsgVo msgVo = new SocketMsgVo();
-            msgVo.setCode(jsonObject.getString("code"));
+            msgVo.setCode(SocketMsgTypeEnum.SINGLE_MSG);
+            //msgVo.setCode(jsonObject.getString("code"));
             msgVo.setSender(userId);
             msgVo.setReceiver(userJson.getString("userId"));
-            msgVo.setMsg(res);
+            //msgVo.setMsg(res);
+            SocketMsgDetailVo detailVo = new SocketMsgDetailVo();
+            detailVo.setCode(SocketMsgDetailTypeEnum.GROUP_EDIT);
+            detailVo.setData(groupTaskDto);
+            msgVo.setMsg(detailVo);
             //todo SocketMsgVo加密
             rabbitMqMsgProducer.sendSocketPrivateMsg(msgVo);
 
@@ -225,15 +239,20 @@ public class ProcessEditGroup extends AbstractMsgProcessor {
             groupTaskDto1.setTimestamp(zzGroupInfo.getCreateTime());
             groupTaskDto1.setZzGroup(zzGroupInfo);
             groupTaskDto1.setReviser(zzGroupInfo.getCreator());
-            groupEditVO.setCode(CREATE_GROUP_ANS);
+            /*groupEditVO.setCode(CREATE_GROUP_ANS);
             groupEditVO.setData(groupTaskDto1);
             String res1 = JSONObject.toJSONString(groupEditVO, SerializerFeature.DisableCircularReferenceDetect);
-
+*/
             SocketMsgVo msgVo1 = new SocketMsgVo();
-            msgVo1.setCode(jsonObject.getString("code"));
+            msgVo1.setCode(SocketMsgTypeEnum.SINGLE_MSG);
+            //msgVo1.setCode(jsonObject.getString("code"));
             msgVo1.setSender(userId);
             msgVo1.setReceiver(userJson.getString("userId"));
-            msgVo1.setMsg(res1);
+            //msgVo1.setMsg(res1);
+            SocketMsgDetailVo detailVo1 = new SocketMsgDetailVo();
+            detailVo1.setCode(SocketMsgDetailTypeEnum.GROUP_CREATE_ANS);
+            detailVo1.setData(groupTaskDto1);
+            msgVo1.setMsg(detailVo1);
             //todo SocketMsgVo加密
             rabbitMqMsgProducer.sendSocketPrivateMsg(msgVo1);
         }

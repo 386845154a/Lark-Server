@@ -2,7 +2,7 @@ package com.workhub.z.servicechat;
 
 
 import com.workhub.z.servicechat.config.CacheConst;
-import com.workhub.z.servicechat.config.common;
+import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.redis.RedisUtil;
 import org.mybatis.spring.annotation.MapperScan;
 import org.slf4j.Logger;
@@ -51,7 +51,7 @@ public class ServiceChatApplication {
                 RedisUtil.removeKeys(CacheConst.SECRET_WORDSCACHE);
             } catch (Exception e) {
                 logger.error("初始化清除缓存操作异常");
-                logger.error(common.getExceptionMessage(e));
+                logger.error(Common.getExceptionMessage(e));
             }
         }
     }

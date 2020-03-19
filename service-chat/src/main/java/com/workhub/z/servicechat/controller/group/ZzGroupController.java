@@ -9,9 +9,9 @@ import com.github.hollykunge.security.common.vo.rpcvo.ContactVO;
 import com.github.pagehelper.PageInfo;
 import com.workhub.z.servicechat.VO.*;
 import com.workhub.z.servicechat.config.CacheConst;
+import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.config.MessageType;
 import com.workhub.z.servicechat.config.RandomId;
-import com.workhub.z.servicechat.config.common;
 import com.workhub.z.servicechat.entity.group.ZzGroup;
 import com.workhub.z.servicechat.feign.IUserService;
 import com.workhub.z.servicechat.model.GroupEditDto;
@@ -78,10 +78,10 @@ public class ZzGroupController  {
         ObjectRestResponse objectRestResponse = new ObjectRestResponse();
         objectRestResponse.msg("200");
 
-        GroupInfoVO groupInfo = new GroupInfoVO();
-        groupInfo = (GroupInfoVO)ZzGroupToGroupInfo(this.zzGroupService.queryById(groupId));
+        GroupInfoVo groupInfo = new GroupInfoVo();
+        groupInfo = (GroupInfoVo)ZzGroupToGroupInfo(this.zzGroupService.queryById(groupId));
         groupInfo.setMemberNum(Math.toIntExact(this.zzGroupService.groupUserListTotal(groupId)));
-        common.putVoNullStringToEmptyString(groupInfo);
+        Common.putVoNullStringToEmptyString(groupInfo);
         objectRestResponse.data(groupInfo);
         return objectRestResponse;
     }
@@ -90,10 +90,10 @@ public class ZzGroupController  {
     public ObjectRestResponse insert(@RequestBody ZzGroup zzGroup,@RequestParam("token")String token) throws Exception{
         zzGroup.setGroupId(RandomId.getUUID());
         zzGroup.setCreateTime(new Date());
-        String userId=common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String userId= Common.nulToEmptyString(request.getHeader("userId"));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
         try {
-            common.putEntityNullToEmptyString(zzGroup);
+            Common.putEntityNullToEmptyString(zzGroup);
             if(zzGroup!=null && zzGroup.getIscross().equals("")){
                 zzGroup.setIscross("0");
             }
@@ -103,7 +103,7 @@ public class ZzGroupController  {
             zzGroup.setGroupOwnerId(userId);
             zzGroup.setGroupOwnerName(userName);
         }catch (Exception e){
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
         this.zzGroupService.insert(zzGroup);
 //        Integer insert = this.zzGroupService.insert(zzGroup);
@@ -120,9 +120,9 @@ public class ZzGroupController  {
 
     @PostMapping("/update")
     public ObjectRestResponse update(@RequestBody ZzGroup zzGroup){
-        String userId = common.nulToEmptyString(request.getHeader("userId"));
+        String userId = Common.nulToEmptyString(request.getHeader("userId"));
         try {
-            common.putEntityNullToEmptyString(zzGroup);
+            Common.putEntityNullToEmptyString(zzGroup);
             zzGroup.setCreateTime(null);
             zzGroup.setUpdator(userId);
         }catch (Exception e){
@@ -189,34 +189,34 @@ public class ZzGroupController  {
     @GetMapping("/queryGroupListByUserId")
     public ListRestResponse queryGroupListByUserId(@RequestParam("userId")String userId) throws Exception {
         List<ZzGroup> groups = this.zzGroupService.queryGroupListByUserId(userId);
-        common.putVoNullStringToEmptyString(groups);
+        Common.putVoNullStringToEmptyString(groups);
         return new ListRestResponse("200",groups.size(),groups);
     }
 
     @GetMapping("/queryContactListById2")
     public ListRestResponse queryContactListById2(@RequestParam("userId")String userId) throws Exception {
         List<ContactVO> contactVOS = userGroupService.getContactVOList2(userId);
-        common.putVoNullStringToEmptyString(contactVOS);
+        Common.putVoNullStringToEmptyString(contactVOS);
 //        List<ZzGroup> groups = this.zzGroupService.queryGroupListByUserId(userId);
         return new ListRestResponse("200", contactVOS.size(), contactVOS);
     }
     @GetMapping("/queryContactListById")
     public ListRestResponse queryContactListById(@RequestParam("userId")String userId) throws Exception {
         List<ContactVO> contactVOS = userGroupService.getContactVOList(userId);
-        common.putVoNullStringToEmptyString(contactVOS);
+        Common.putVoNullStringToEmptyString(contactVOS);
 //        List<ZzGroup> groups = this.zzGroupService.queryGroupListByUserId(userId);
         return new ListRestResponse("200", contactVOS.size(), contactVOS);
     }
     @GetMapping("/queryHistoryMessageById2")
     public ListRestResponse queryHistoryMessageById2(@RequestParam("userId")String userId) throws Exception {
-//        List<HistoryMessageVO> query = this.groupMsgService.queryHistoryMessageById(userId);
+//        List<HistoryMessageVo> query = this.groupMsgService.queryHistoryMessageById(userId);
         String res =  messageInfoService.queryContactsMessage2(userId);
         JSONArray myJsonArray = JSONArray.parseArray(res);
         return new ListRestResponse("200", 0,myJsonArray);
     }
     @GetMapping("/queryHistoryMessageById")
     public ListRestResponse queryHistoryMessageById(@RequestParam("userId")String userId) throws Exception {
-//        List<HistoryMessageVO> query = this.groupMsgService.queryHistoryMessageById(userId);
+//        List<HistoryMessageVo> query = this.groupMsgService.queryHistoryMessageById(userId);
         String res =  messageInfoService.queryContactsMessage(userId);
         JSONArray myJsonArray = JSONArray.parseArray(res);
         return new ListRestResponse("200", myJsonArray.size(),myJsonArray);
@@ -225,13 +225,13 @@ public class ZzGroupController  {
      * @MethodName: queryMessageList
      * @Description:
      * @Param: [type 消息类型 USER私人 GROUP群 MEET会议, receiver 接收人]
-     * @Return: com.github.hollykunge.security.common.msg.ListRestResponse
+     * @Return: com.github.hollykunge.security.Common.msg.ListRestResponse
      * @Author: zhuqz
      * @Date: 2019/10/18
      **/
     @GetMapping("/queryMessageList2")
     public ListRestResponse queryMessageList2(@RequestParam("type")String type,@RequestParam("receiver")String receiver) throws Exception {
-        String userId=common.nulToEmptyString(request.getHeader("userId"));
+        String userId= Common.nulToEmptyString(request.getHeader("userId"));
         String res =  messageInfoService.queryMessageList2(type,receiver,userId);
         JSONArray myJsonArray = JSONArray.parseArray(res);
         return new ListRestResponse("200", 0,myJsonArray);
@@ -240,13 +240,13 @@ public class ZzGroupController  {
     * @MethodName: queryMessageList
      * @Description:
      * @Param: [type 消息类型 USER私人 GROUP群 MEET会议, receiver 接收人]
-     * @Return: com.github.hollykunge.security.common.msg.ListRestResponse
+     * @Return: com.github.hollykunge.security.Common.msg.ListRestResponse
      * @Author: zhuqz
      * @Date: 2019/10/18
     **/
     @GetMapping("/queryMessageList")
     public ListRestResponse queryMessageList(@RequestParam("type")String type,@RequestParam("receiver")String receiver) throws Exception {
-        String userId=common.nulToEmptyString(request.getHeader("userId"));
+        String userId= Common.nulToEmptyString(request.getHeader("userId"));
         String res =  messageInfoService.queryMessageList(type,receiver,userId);
         JSONArray myJsonArray = JSONArray.parseArray(res);
         return new ListRestResponse("200", myJsonArray.size(),myJsonArray);
@@ -262,7 +262,7 @@ public class ZzGroupController  {
     public ObjectRestResponse deleteGroupLogic(@RequestParam("groupId")String groupId,@RequestParam("delFlg")String delFlg) {
         ObjectRestResponse objectRestResponse = new ObjectRestResponse();
         String oppRes = "1";
-        String userId=common.nulToEmptyString(request.getHeader("userId"));
+        String userId= Common.nulToEmptyString(request.getHeader("userId"));
         try {
             this.zzGroupService.deleteGroupLogic(groupId,delFlg,userId);
         }catch (Exception e){
@@ -315,16 +315,16 @@ public class ZzGroupController  {
 
         String userIds= this.zzGroupService.getGroupUserList(groupId);
         List<AdminUser> list  = iUserService.userList(userIds);
-        List<UserInfoVO> dataList = new ArrayList<>();
+        List<UserInfoVo> dataList = new ArrayList<>();
         for(AdminUser userTemp:list){
-            UserInfoVO vo = new UserInfoVO();
+            UserInfoVo vo = new UserInfoVo();
             vo.setId(userTemp.getId());
             vo.setName(userTemp.getName());
             vo.setSecretLevel(userTemp.getSecretLevel());
             vo.setOrgId(userTemp.getOrgCode());
             vo.setOrgName(userTemp.getOrgName());
             vo.setAvatar(userTemp.getAvatar());
-            String online = common.nulToEmptyString(RedisUtil.getValue(CacheConst.userOnlineCahce+common.nulToEmptyString(userTemp.getId())));
+            String online = Common.nulToEmptyString(RedisUtil.getValue(CacheConst.userOnlineCahce+ Common.nulToEmptyString(userTemp.getId())));
             vo.setOnline((MessageType.ONLINE+"").equals(online)?"1":"0");
             vo.setPathName(userTemp.getPathName());
             dataList.add(vo);
@@ -337,7 +337,7 @@ public class ZzGroupController  {
 //                return lhs.getName().compareTo(rhs.getName());
 //            }
 //        });
-        dataList.sort(Comparator.comparing(UserInfoVO::getOnline).reversed().thenComparing(UserInfoVO::getName));
+        dataList.sort(Comparator.comparing(UserInfoVo::getOnline).reversed().thenComparing(UserInfoVo::getName));
         ListRestResponse res=new ListRestResponse("200",dataList.size(),dataList);
         return res;
     }
@@ -348,12 +348,12 @@ public class ZzGroupController  {
      * @return
      */
     @GetMapping("/groupListMonitoring")
-    public TableResultResponse<GroupVO> groupListMonitoring(@RequestParam Map<String,String> params){
-        TableResultResponse<GroupVO> pageInfo = null;
+    public TableResultResponse<GroupVo> groupListMonitoring(@RequestParam Map<String,String> params){
+        TableResultResponse<GroupVo> pageInfo = null;
         try {
             pageInfo = this.zzGroupService.groupListMonitoring(params);
         } catch (Exception e) {
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
         }
         return pageInfo;
     }
@@ -363,8 +363,8 @@ public class ZzGroupController  {
      */
     @GetMapping("dissolve")
     public ObjectRestResponse dissolve(@RequestParam("groupId") String groupId,ChannelContext channelContext) throws Exception{
-        String userId=common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String userId= Common.nulToEmptyString(request.getHeader("userId"));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
         zzGroupService.dissolveGroup(groupId,userId,userName);
         return new ObjectRestResponse().rel(true).msg("研讨组已解散...");
     }
@@ -395,8 +395,8 @@ public class ZzGroupController  {
         ObjectRestResponse objectRestResponse = new ObjectRestResponse();
         objectRestResponse.rel(true);
         objectRestResponse.msg("编辑成员成功");
-        String userId=common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String userId= Common.nulToEmptyString(request.getHeader("userId"));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
 
         ZzGroup zzGroupNow = zzGroupService.queryById(groupInfo.getGroupId());
         String groupOwner = zzGroupNow.getGroupOwnerId();
@@ -448,7 +448,7 @@ public class ZzGroupController  {
         ObjectRestResponse objectRestResponse = new ObjectRestResponse();
         ZzGroup groupInfo = new ZzGroup();
         groupInfo = this.zzGroupService.queryById(groupId);
-        common.putVoNullStringToEmptyString(groupInfo);
+        Common.putVoNullStringToEmptyString(groupInfo);
         GroupAllInfoVo groupAllInfo = new GroupAllInfoVo();
         groupAllInfo.setAdminUserList(list);
         groupAllInfo.setGroupInfo(groupInfo);

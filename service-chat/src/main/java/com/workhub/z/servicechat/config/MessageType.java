@@ -137,14 +137,28 @@ public class MessageType {
    /**机密*/
     public static final String HIGH_SECRECT_LEVEL = "60";
 
-    /**群体socket绑定**/
-    public static final String SOCKET_TEAM_BIND = "10000000000000000";
+    /**
+     * 信息中心 编码规则六位 三层级别 前两位是信息中心大类，如20代表单人消息
+     * 后四位对于业务代码，中间两位代表业务一层，最后两位代表具体业务
+     * 举例：200201 前两位20代表单人消息 中间两位02代表给单人发的是通知类消息，
+     * 最后两位01说明接收人点开了和他聊天的界面,看见了所有消息
+     * 目前因为前期编码未考虑，没有完全遵守该规则
+     **/
+    /**群体socket群体绑定**/
+    public static final String SOCKET_TEAM_BIND = "300000";
+    /**群体列表socket群体绑定用户**/
+    public static final String SOCKET_TEAM_BIND_LIST = "400000";
     /**群体socket绑定解除**/
-    public static final String SOCKET_TEAM_UNBIND = "10000000000000001";
-    /**会议变更**/
-    public static final String SOCKET_MEET_CHANGE = "400000000000000";
-    /**系统通知**/
-    public static final String SOCKET_SYSTEM = "500000000000000";
-    /**socket通知发送人，接收人点开了和他聊天的界面,看见了所有消息**/
-    public static final String SOCKET_PRIVATE_SEEMSG = "200000000000000001";
+    public static final String SOCKET_TEAM_UNBIND = "600000";
+    /**单人消息**/
+    public static final String SOCKET_SINGLE = "200000";
+    //离线消息
+    public static final String SOCKET_SINGLE_OFFLINE_MSG = "200301";
+    /**单人通知对方打开消息面包 通知发送人，接收人点开了和他聊天的界面,看见了所有消息**/
+    public static final String SOCKET_SINGLE_NOTE_SEEMSG = "200201";
+    /**群体消息**/
+    public static final String SOCKET_TEAM = "100000";
+    /**信息中心详细编码，默认**/
+    public static final String SOCKET_DETAIL_DEFAULT = "999999";
+
 }

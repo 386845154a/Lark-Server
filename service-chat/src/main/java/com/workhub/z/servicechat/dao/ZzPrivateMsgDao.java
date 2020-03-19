@@ -1,6 +1,6 @@
 package com.workhub.z.servicechat.dao;
 
-import com.workhub.z.servicechat.VO.PrivateFileVO;
+import com.workhub.z.servicechat.VO.PrivateFileVo;
 import com.workhub.z.servicechat.entity.message.ZzPrivateMsg;
 import org.apache.ibatis.annotations.Param;
 import tk.mybatis.mapper.common.Mapper;
@@ -16,5 +16,5 @@ import java.util.List;
 public interface ZzPrivateMsgDao extends Mapper<ZzPrivateMsg> {
     //查询私有聊天文件
     //query文件名称
-    List<PrivateFileVO> getFileList(@Param("userId") String userId,@Param("receiverId") String receiverId,@Param("query") String query);
+    List<PrivateFileVo> getFileList(@Param("userId") String userId, @Param("receiverId") String receiverId, @Param("query") String query);
 }

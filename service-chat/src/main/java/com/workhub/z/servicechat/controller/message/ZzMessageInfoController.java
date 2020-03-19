@@ -3,7 +3,7 @@ package com.workhub.z.servicechat.controller.message;
 import com.github.hollykunge.security.common.msg.ObjectRestResponse;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
 import com.workhub.z.servicechat.VO.MsgSendStatusVo;
-import com.workhub.z.servicechat.config.common;
+import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.processor.ProcessMsg;
 import com.workhub.z.servicechat.service.ZzMessageInfoService;
 import org.slf4j.Logger;
@@ -92,14 +92,14 @@ public class ZzMessageInfoController {
             res.rel(true);
             res.msg("200");
 
-            String userIp = common.nulToEmptyString(request.getHeader("userHost"));
-            String userId = common.nulToEmptyString(request.getHeader("userId"));
+            String userIp = Common.nulToEmptyString(request.getHeader("userHost"));
+            String userId = Common.nulToEmptyString(request.getHeader("userId"));
             try {
                 MsgSendStatusVo msgSendStatusVo = processMsg.process(userId,messageInf,userIp);
                 res.data(msgSendStatusVo) ;
             }catch (Exception e){
                 log.error("发送消息出错！！！");
-                log.error(common.getExceptionMessage(e));
+                log.error(Common.getExceptionMessage(e));
                 res.rel(false);
                 res.msg("500");
                 res.data("发送失败");
@@ -110,7 +110,7 @@ public class ZzMessageInfoController {
      * @MethodName:
      * @Description: 消息确认
      * @Param:
-     * @Return: com.github.hollykunge.security.common.msg.ObjectRestResponse 返回会议id
+     * @Return: com.github.hollykunge.security.Common.msg.ObjectRestResponse 返回会议id
      * @Author:
      * @Date: 2020/02/23
      **/

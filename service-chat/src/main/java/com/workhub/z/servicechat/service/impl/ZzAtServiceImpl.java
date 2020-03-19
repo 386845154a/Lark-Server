@@ -3,7 +3,7 @@ package com.workhub.z.servicechat.service.impl;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.workhub.z.servicechat.config.common;
+import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.dao.ZzAtDao;
 import com.workhub.z.servicechat.entity.message.ZzAt;
 import com.workhub.z.servicechat.service.ZzAtService;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.List;
 
-import static com.workhub.z.servicechat.config.common.putEntityNullToEmptyString;
+import static com.workhub.z.servicechat.config.Common.putEntityNullToEmptyString;
 
 /**
  * 提及（@）功能实现(ZzAt)表服务实现类
@@ -39,9 +39,9 @@ public class ZzAtServiceImpl implements ZzAtService  {
     public ZzAt queryById(String id) {
         ZzAt zzAt = this.zzAtDao.queryById(id);
         try {
-            common.putVoNullStringToEmptyString(zzAt);
+            Common.putVoNullStringToEmptyString(zzAt);
         } catch (Exception e) {
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
 
         }
         return zzAt;
@@ -119,9 +119,9 @@ public class ZzAtServiceImpl implements ZzAtService  {
         PageHelper.startPage(pageNum, pageSize);
         List<ZzAt> list = this.zzAtDao.getList(receiverId,groupId);
         try {
-            common.putVoNullStringToEmptyString(list);
+            Common.putVoNullStringToEmptyString(list);
         } catch (Exception e) {
-            log.error(common.getExceptionMessage(e));
+            log.error(Common.getExceptionMessage(e));
 
         }
         PageInfo<ZzAt> pageInfo = new PageInfo<>(list);

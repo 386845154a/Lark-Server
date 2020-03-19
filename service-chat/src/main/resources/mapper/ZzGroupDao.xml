@@ -34,7 +34,7 @@
         <result column="HEAD" property="head" jdbcType="VARCHAR"></result>-->
     </resultMap>
 
-    <resultMap type="com.workhub.z.servicechat.VO.GroupVO" id="GroupVO">
+    <resultMap type="com.workhub.z.servicechat.VO.GroupVo" id="GroupVO">
         <result property="groupId" column="GROUP_ID" jdbcType="VARCHAR"/>
         <result property="groupName" column="GROUP_NAME" jdbcType="VARCHAR"/>
         <result property="groupDescribe" column="GROUP_DESCRIBE" jdbcType="VARCHAR"/>

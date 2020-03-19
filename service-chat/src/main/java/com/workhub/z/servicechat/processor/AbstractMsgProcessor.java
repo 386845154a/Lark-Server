@@ -3,11 +3,8 @@ package com.workhub.z.servicechat.processor;
 import com.alibaba.fastjson.JSONObject;
 import com.github.hollykunge.security.admin.api.dto.AdminUser;
 import com.workhub.z.servicechat.VO.*;
-import com.workhub.z.servicechat.config.FileTypeEnum;
-import com.workhub.z.servicechat.config.MessageType;
-import com.workhub.z.servicechat.config.RandomId;
-import com.workhub.z.servicechat.config.common;
-import com.workhub.z.servicechat.entity.*;
+import com.workhub.z.servicechat.config.*;
+import com.workhub.z.servicechat.entity.ZzContactInf;
 import com.workhub.z.servicechat.entity.config.ZzDictionaryWords;
 import com.workhub.z.servicechat.entity.group.ZzGroup;
 import com.workhub.z.servicechat.entity.group.ZzGroupFile;
@@ -26,13 +23,13 @@ import org.springframework.stereotype.Service;
 import org.tio.core.ChannelContext;
 import org.tio.core.Tio;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 
-import static com.workhub.z.servicechat.config.MessageType.MSG_ANSWER;
+import static com.workhub.z.servicechat.config.Common.getJsonStringKeyValue;
+import static com.workhub.z.servicechat.config.Common.stringSearch;
 import static com.workhub.z.servicechat.config.MessageType.SUCCESS_ANSWER;
 import static com.workhub.z.servicechat.config.RandomId.getUUID;
-import static com.workhub.z.servicechat.config.common.getJsonStringKeyValue;
-import static com.workhub.z.servicechat.config.common.stringSearch;
 
 @Service
 public class AbstractMsgProcessor {
@@ -77,17 +74,17 @@ public class AbstractMsgProcessor {
             MessageSecretValidVo messageSecretValidVo = new MessageSecretValidVo();
             messageSecretValidVo.setSendStatus("1");
             try {
-                common.putVoNullStringToEmptyString(messageSecretValidVo);
+                Common.putVoNullStringToEmptyString(messageSecretValidVo);
             }catch (Exception e){
                 logger.error("过滤敏感词汇出错！");
-                logger.error(common.getExceptionMessage(e));
+                logger.error(Common.getExceptionMessage(e));
             }
             return messageSecretValidVo;
         }
         if(msgtxt==null){
             msgtxt="";
         }
-        return common.checkMessageSecretQuick(msgtxt,zzDictionaryWordsList);
+        return Common.checkMessageSecretQuick(msgtxt,zzDictionaryWordsList);
     }
     // TODO: 2019/5/31 敏感词过滤
     
@@ -130,7 +127,7 @@ public class AbstractMsgProcessor {
         megReadLog.setSender(sender);
         megReadLog.setReviserName(receiverName);
         megReadLog.setSenderName(senderName);
-        common.nulToEmptyString(megReadLog);
+        Common.nulToEmptyString(megReadLog);
         megReadLogService.insert(megReadLog);
         msgReadRelationService.deleteByConsumerAndSender(sender,receiver);
         //通知发消息的人，接收人已经点开了消息的页面
@@ -143,13 +140,16 @@ public class AbstractMsgProcessor {
                 receiverContact.getType().equals("USER")){
             //todo 改成socket代码规范
             SocketMsgVo msgVo = new SocketMsgVo();
-            msgVo.setCode(MessageType.SOCKET_PRIVATE_SEEMSG);
+            msgVo.setCode(SocketMsgTypeEnum.SINGLE_MSG);
             msgVo.setSender(receiver);
             msgVo.setReceiver(sender);
             SocketMsgReaderVo readerVo = new SocketMsgReaderVo();
             readerVo.setReaderId(receiver);
             readerVo.setSenderId(sender);
-            msgVo.setMsg(readerVo);
+            SocketMsgDetailVo detailVo = new SocketMsgDetailVo();
+            detailVo.setData(readerVo);
+            detailVo.setCode(SocketMsgDetailTypeEnum.PRIVATE_RECEIVER_OPEN_BOARD);
+            msgVo.setMsg(detailVo);
             //todo SocketMsgVo加密
             rabbitMqMsgProducer.sendSocketPrivateMsg(msgVo);
         }
@@ -187,8 +187,8 @@ public class AbstractMsgProcessor {
             List<UserInfo> userInfoList = iUserServiceUserService.userList(sender+","+receiver);
             UserInfo senderInf = userInfoList.get(0)==null?new UserInfo():userInfoList.get(0);
             UserInfo receiveInf = userInfoList.get(1)==null?new UserInfo():userInfoList.get(1);
-            String senderOrg = common.nulToEmptyString(senderInf.getOrgCode());
-            String receiverOrg = common.nulToEmptyString(receiveInf.getOrgCode());
+            String senderOrg = Common.nulToEmptyString(senderInf.getOrgCode());
+            String receiverOrg = Common.nulToEmptyString(receiveInf.getOrgCode());
             //以下逻辑照搬admin服务OrgBiz的getOrgUsers方法
             if(senderOrg.equals("") || receiverOrg.equals("")){
                 //跨场所
@@ -245,24 +245,24 @@ public class AbstractMsgProcessor {
         String message = jsonObject.getString("data");
         //文件上传信息更新begin
         try {
-            String msgType = common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.type"));
+            String msgType = Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.type"));
             //如果是文件或者图片上传
             if("2".equals(msgType)||"3".equals(msgType)){
                 ZzGroupFile zzGroupFile = new ZzGroupFile();
                 zzGroupFile.setId(RandomId.getUUID());
-                zzGroupFile.setFileId(common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.id")));
-                zzGroupFile.setCreator(common.nulToEmptyString(common.getJsonStringKeyValue(message,"fromId")));
-                zzGroupFile.setCreatorName(common.nulToEmptyString(common.getJsonStringKeyValue(message,"username")));
+                zzGroupFile.setFileId(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.id")));
+                zzGroupFile.setCreator(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"fromId")));
+                zzGroupFile.setCreatorName(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"username")));
                 zzGroupFile.setCreateTime(new Date());
-                zzGroupFile.setSizes(Double.parseDouble(common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.fileSize"))));
-                zzGroupFile.setFileName(common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.title")));
-                zzGroupFile.setFileExt(common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.extension")));
-                zzGroupFile.setFileType(FileTypeEnum.getEnumByValue(common.nulToEmptyString(zzGroupFile.getFileExt())).getType());
-                zzGroupFile.setLevels(common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.secretLevel")));
-                zzGroupFile.setGroupId(common.nulToEmptyString(common.getJsonStringKeyValue(message,"toId")));
-                zzGroupFile.setReceiverName(common.nulToEmptyString(common.getJsonStringKeyValue(message,"toName")));
+                zzGroupFile.setSizes(Double.parseDouble(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.fileSize"))));
+                zzGroupFile.setFileName(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.title")));
+                zzGroupFile.setFileExt(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.extension")));
+                zzGroupFile.setFileType(FileTypeEnum.getEnumByValue(Common.nulToEmptyString(zzGroupFile.getFileExt())).getType());
+                zzGroupFile.setLevels(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.secretLevel")));
+                zzGroupFile.setGroupId(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"toId")));
+                zzGroupFile.setReceiverName(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"toName")));
                 zzGroupFile.setApproveFlg("0");//默认都是审批不通过
-                boolean isGroup = (Boolean) common.getJsonStringKeyValue(message,"isGroup");
+                boolean isGroup = (Boolean) Common.getJsonStringKeyValue(message,"isGroup");
                 zzGroupFile.setIsGroup(isGroup?String.valueOf(MessageType.GROUP_FILE):String.valueOf(MessageType.PRIVATE_FILE));
                 if(zzGroupFile.getIsGroup().equals(String.valueOf(MessageType.GROUP_FILE))){
                     if(zzGroupFile.getLevels().equals(MessageType.NO_SECRECT_LEVEL)){//如果是非密文件
@@ -273,41 +273,41 @@ public class AbstractMsgProcessor {
                 //记录群状态变动
                 ZzGroupStatus zzGroupStatus = new ZzGroupStatus();
                 zzGroupStatus.setId(RandomId.getUUID());
-                zzGroupStatus.setOperatorName(common.nulToEmptyString(common.getJsonStringKeyValue(message,"username")));
-                zzGroupStatus.setOperator(common.nulToEmptyString(common.getJsonStringKeyValue(message,"fromId")));
+                zzGroupStatus.setOperatorName(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"username")));
+                zzGroupStatus.setOperator(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"fromId")));
                 zzGroupStatus.setOperateType(MessageType.FLOW_UPLOADFILE);//上传附件
-                zzGroupStatus.setGroupId(common.nulToEmptyString(common.getJsonStringKeyValue(message,"toId")));
+                zzGroupStatus.setGroupId(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"toId")));
                 zzGroupStatus.setOperateTime(new Date());
-                zzGroupStatus.setDescribe(common.nulToEmptyString(common.getJsonStringKeyValue(message,"username"))+
+                zzGroupStatus.setDescribe(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"username"))+
                         "上传了附件："+
-                        common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.title"))+
-                        (((common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.extension"))).equals(""))?"":("."+ common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.extension"))))
+                        Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.title"))+
+                        (((Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.extension"))).equals(""))?"":("."+ Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.extension"))))
                 );
                 try{
                     rabbitMqMsgProducer.sendMsgGroupChange(zzGroupStatus);
                 }catch (Exception ex){
                     logger.error("聊天附件mq发送消息异常");
-                    logger.error(common.getExceptionMessage(ex));
+                    logger.error(Common.getExceptionMessage(ex));
                 }
 
             }
 
         //文件上传信息更新end
         //保存消息begin
-        String receiver  = common.nulToEmptyString(common.getJsonStringKeyValue(message,"toId"));
-        String sender = common.nulToEmptyString(common.getJsonStringKeyValue(message,"fromId"));
+        String receiver  = Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"toId"));
+        String sender = Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"fromId"));
         messageInfo.setMsgId(msgId);
         messageInfo.setCreatetime(new Date());
-        messageInfo.setLevels(common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.secretLevel")));
+        messageInfo.setLevels(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.secretLevel")));
         messageInfo.setReceiver(receiver);
         messageInfo.setSender(sender);
         messageInfo.setType(type);
         messageInfo.setIp(ip);
-        messageInfo.setFrontId(common.nulToEmptyString(common.getJsonStringKeyValue(message,"id")));
+        messageInfo.setFrontId(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"id")));
         messageInfo.setContent(message);
-        messageInfo.setFileType(common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.type")));
+        messageInfo.setFileType(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.type")));
 
-        /*JSONArray atUsers = ((JSONArray) common.getJsonStringKeyValue(message,"atId"));
+        /*JSONArray atUsers = ((JSONArray) Common.getJsonStringKeyValue(message,"atId"));
         if(atUsers.size()!=0){
             String atNames = "";
             for(int i=0;i<atUsers.size();i++){
@@ -318,8 +318,8 @@ public class AbstractMsgProcessor {
                 atNames = atNames.substring(1);
             }
         }*/
-        messageInfo.setMsg(common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.title")));
-        messageInfo.setFileId(common.nulToEmptyString(common.getJsonStringKeyValue(message,"content.id")));
+        messageInfo.setMsg(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.title")));
+        messageInfo.setFileId(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.id")));
         //0科室内1跨科室2跨场所
         String iscross = MessageType.CROSSTYPE_SAME_OFFICE;
         if("GROUP".equals(type)){//如是群消息
@@ -332,8 +332,8 @@ public class AbstractMsgProcessor {
             List<AdminUser> userInfoList = iUserService.userList(sender+","+receiver);
             AdminUser senderInf = userInfoList.get(0)==null?new AdminUser():userInfoList.get(0);
             AdminUser receiveInf = userInfoList.get(1)==null?new AdminUser():userInfoList.get(1);
-            String senderOrg = common.nulToEmptyString(senderInf.getOrgCode());
-            String receiverOrg = common.nulToEmptyString(receiveInf.getOrgCode());
+            String senderOrg = Common.nulToEmptyString(senderInf.getOrgCode());
+            String receiverOrg = Common.nulToEmptyString(receiveInf.getOrgCode());
             //以下逻辑照搬admin服务OrgBiz的getOrgUsers方法
             if(senderOrg.equals("") || receiverOrg.equals("")){
                 //跨场所
@@ -379,18 +379,18 @@ public class AbstractMsgProcessor {
         if("0".equals(senderCnt)){
             zzContactInfSender.setId(sender);
             zzContactInfSender.setType("USER");
-            zzContactInfSender.setAvartar(common.nulToEmptyString(common.getJsonStringKeyValue(message,"avatar")));
-            zzContactInfSender.setName(common.nulToEmptyString(common.getJsonStringKeyValue(message,"username")));
+            zzContactInfSender.setAvartar(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"avatar")));
+            zzContactInfSender.setName(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"username")));
             zzContactInfSender.setMemberNum("2");
             zzContactInfSender.setGroupOwner("");
             AdminUser userSenderInf = this.iUserService.getUserInfo(sender);
             if(userSenderInf == null){
                 userSenderInf = new AdminUser();
-                common.putVoNullStringToEmptyString(userSenderInf);
+                Common.putVoNullStringToEmptyString(userSenderInf);
             }
             zzContactInfSender.setLevels(userSenderInf.getSecretLevel());
             zzContactInfSender.setPid(userSenderInf.getPId());
-            common.putVoNullStringToEmptyString(zzContactInfSender);
+            Common.putVoNullStringToEmptyString(zzContactInfSender);
             this.zzContactService.add(zzContactInfSender);
         }
         String receiverCnt = this.zzContactService.countsById(receiver);
@@ -398,18 +398,18 @@ public class AbstractMsgProcessor {
         if("0".equals(receiverCnt)){
             zzContactInfReceiver.setId(receiver);
             zzContactInfReceiver.setType(type);
-            zzContactInfReceiver.setName(common.nulToEmptyString(common.getJsonStringKeyValue(message,"toName")));
+            zzContactInfReceiver.setName(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"toName")));
             if("GROUP".equals(type) || "MEET".equals(type)){
-                zzContactInfReceiver.setAvartar(common.nulToEmptyString(common.getJsonStringKeyValue(message,"contactInfo.avatar")));
-                zzContactInfReceiver.setLevels(common.nulToEmptyString(common.getJsonStringKeyValue(message,"contactInfo.secretLevel")));
+                zzContactInfReceiver.setAvartar(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"contactInfo.avatar")));
+                zzContactInfReceiver.setLevels(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"contactInfo.secretLevel")));
                 zzContactInfReceiver.setPid("");
-                zzContactInfReceiver.setMemberNum(common.nulToEmptyString(common.getJsonStringKeyValue(message,"contactInfo.memberNum")));
-                zzContactInfReceiver.setGroupOwner(common.nulToEmptyString(common.getJsonStringKeyValue(message,"contactInfo.groupOwnerId")));
+                zzContactInfReceiver.setMemberNum(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"contactInfo.memberNum")));
+                zzContactInfReceiver.setGroupOwner(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"contactInfo.groupOwnerId")));
             }else if("USER".equals(type)){
                 AdminUser userReceiverInf = this.iUserService.getUserInfo(receiver);
                 if(userReceiverInf == null){
                     userReceiverInf = new AdminUser();
-                    common.putVoNullStringToEmptyString(userReceiverInf);
+                    Common.putVoNullStringToEmptyString(userReceiverInf);
                 }
                 zzContactInfReceiver.setLevels(userReceiverInf.getSecretLevel());
                 zzContactInfReceiver.setPid(userReceiverInf.getPId());
@@ -417,13 +417,13 @@ public class AbstractMsgProcessor {
                 zzContactInfSender.setGroupOwner("");
                 zzContactInfReceiver.setMemberNum("2");
             }
-            common.putVoNullStringToEmptyString(zzContactInfReceiver);
+            Common.putVoNullStringToEmptyString(zzContactInfReceiver);
             this.zzContactService.add(zzContactInfReceiver);
         }
         //保存联系人信息end
         } catch (Exception e) {
             //异常记录到日志
-            logger.error(common.getExceptionMessage(e));
+            logger.error(Common.getExceptionMessage(e));
             throw e;
         }
         return msgId;
@@ -436,18 +436,20 @@ public class AbstractMsgProcessor {
     *@date: 2019/7/30
     */
     // TODO: 2019/9/16 应答信息
-    public MsgAnswerVO msgAnswer(String msg, String nId) throws Exception {
+    public SocketMsgDetailVo msgAnswer(String msg, String nId) throws Exception {
         return msgAnswer(msg,nId,SUCCESS_ANSWER,"发送成功");
     }
     //应答消息重载加入 状态 和 应答内容
-    public MsgAnswerVO msgAnswer(String msg, String nId, int status, String content) throws Exception {
-        MsgAnswerVO msgAnswerVO = new MsgAnswerVO();
-        msgAnswerVO.setCode(MSG_ANSWER);
+    public SocketMsgDetailVo msgAnswer(String msg, String nId, int status, String content) throws Exception {
+        SocketMsgDetailVo detailVo = new SocketMsgDetailVo();
+        detailVo.setCode(SocketMsgDetailTypeEnum.PRIVATE_ANSWER);
+        MsgAnswerVo msgAnswerVO = new MsgAnswerVo();
         msgAnswerVO.setContactId((String)getJsonStringKeyValue(msg,"data.toId"));
         msgAnswerVO.setnId(nId);
         msgAnswerVO.setStatus(status);
         msgAnswerVO.setContent(content);
-        return  msgAnswerVO;
+        detailVo.setData(msgAnswerVO);
+        return  detailVo;
    }
 
 }
