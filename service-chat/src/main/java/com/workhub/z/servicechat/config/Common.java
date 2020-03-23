@@ -862,7 +862,7 @@ public class Common {
             return  vo;
         }
         SocketMsgDetailVo msgDetailVo = (SocketMsgDetailVo)msgObj;
-        if(msgDetailVo.getCode()==null || "".equals(msgDetailVo.getCode())){
+        if(msgDetailVo.getCode()==null){
             vo.setRes(false);
             vo.setMsg("消息体没有编码");
             log.error("消息体没有编码");

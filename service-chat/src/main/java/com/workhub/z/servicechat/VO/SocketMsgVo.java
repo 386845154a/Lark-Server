@@ -45,7 +45,7 @@ public class SocketMsgVo implements Serializable {
             }
         }
         if(!check){
-            throw new Exception("编码不再枚举范围内");
+            throw new Exception("编码不再枚举范围内："+code);
 
         }
         this.code = code;

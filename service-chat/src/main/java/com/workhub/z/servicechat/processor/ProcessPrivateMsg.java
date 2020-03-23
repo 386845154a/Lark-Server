@@ -1,7 +1,10 @@
 package com.workhub.z.servicechat.processor;
 
 import com.alibaba.fastjson.JSONObject;
-import com.workhub.z.servicechat.VO.*;
+import com.workhub.z.servicechat.VO.MessageSecretValidVo;
+import com.workhub.z.servicechat.VO.MsgSendStatusVo;
+import com.workhub.z.servicechat.VO.SocketMsgDetailVo;
+import com.workhub.z.servicechat.VO.SocketMsgVo;
 import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.config.MessageType;
 import com.workhub.z.servicechat.config.SocketMsgDetailTypeEnum;
@@ -11,9 +14,8 @@ import com.workhub.z.servicechat.service.ZzPrivateMsgService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static com.workhub.z.servicechat.config.MessageType.MSG_ANSWER;
-import static com.workhub.z.servicechat.config.VoToEntity.MsgVOToModel;
 import static com.workhub.z.servicechat.config.Common.getJsonStringKeyValue;
+import static com.workhub.z.servicechat.config.VoToEntity.MsgVOToModel;
 
 @Service
 public class ProcessPrivateMsg extends AbstractMsgProcessor {
@@ -68,11 +70,11 @@ public class ProcessPrivateMsg extends AbstractMsgProcessor {
                 msgVo.setMsg(detailVo);
                 /**需要接收确认*/
                 msgVo.setConfirmFlg(true);
-                //todo SocketMsgVo加密
+                //todo SocketDetailMsgVo加密
                 msgSendStatusVo.setMsg(msgVo);
                 //todo 发消息后期改成前端连接信息中心
                 //todo 测试使用
-                rabbitMqMsgProducer.sendSocketPrivateMsg(msgVo);
+                //rabbitMqMsgProducer.sendSocketPrivateMsg(msgVo);
            /* //如果不在线则不发
             String online = Common.nulToEmptyString(RedisUtil.getValue(CacheConst.userOnlineCahce+privateMsg.getMsgReceiver()));
 

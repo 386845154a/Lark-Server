@@ -17,8 +17,9 @@ public enum SocketMsgTypeEnum {
     //单个用户绑定多个群体
     BIND_LIST(SOCKET_TEAM_BIND_LIST),
     //单个群体解绑用户
-    UNBIND_USER(SOCKET_TEAM_UNBIND);
-
+    UNBIND_USER(SOCKET_TEAM_UNBIND),
+    //默认编码 这个给信息中心自己处理用的，比如缓存删除等等
+    DEFAULT(SOCKET_DEFAULT);
     
     //编码
     private final String code;

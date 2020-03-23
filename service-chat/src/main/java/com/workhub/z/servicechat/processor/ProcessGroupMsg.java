@@ -1,7 +1,10 @@
 package com.workhub.z.servicechat.processor;
 
 import com.alibaba.fastjson.JSONObject;
-import com.workhub.z.servicechat.VO.*;
+import com.workhub.z.servicechat.VO.MessageSecretValidVo;
+import com.workhub.z.servicechat.VO.MsgSendStatusVo;
+import com.workhub.z.servicechat.VO.SocketMsgDetailVo;
+import com.workhub.z.servicechat.VO.SocketMsgVo;
 import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.config.MessageType;
 import com.workhub.z.servicechat.config.SocketMsgDetailTypeEnum;
@@ -16,9 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.workhub.z.servicechat.config.MessageType.MSG_ANSWER;
-import static com.workhub.z.servicechat.config.VoToEntity.GroupMsgVOToModel;
 import static com.workhub.z.servicechat.config.Common.getJsonStringKeyValue;
+import static com.workhub.z.servicechat.config.VoToEntity.GroupMsgVOToModel;
 
 @Service
 public class ProcessGroupMsg extends AbstractMsgProcessor {
@@ -68,6 +70,7 @@ public class ProcessGroupMsg extends AbstractMsgProcessor {
                         msgVo.setCode(SocketMsgTypeEnum.TEAM_MSG);
                         msgVo.setSender(zzGroupMsg.getMsgSender());
                         msgVo.setReceiver(zzGroupMsg.getMsgReceiver());
+                        msgVo.setId(msgId);
                         SocketMsgDetailVo detailVo = new SocketMsgDetailVo();
                         for(SocketMsgDetailTypeEnum senum:SocketMsgDetailTypeEnum.values()){
                             if(senum.getCode().equals(jsonObject.getString("code"))){
@@ -79,11 +82,11 @@ public class ProcessGroupMsg extends AbstractMsgProcessor {
                         detailVo.setData(Common.getJsonStringKeyValue(newMsg,"data"));
                         //msgVo.setMsg(newMsg);
                         msgVo.setMsg(detailVo);
-                       //todo SocketMsgVo加密
+                       //todo SocketDetailMsgVo加密
                         msgSendStatusVo.setMsg(msgVo);
                        //todo 发消息后期改成前端连接信息中心
                        //todo 测试使用
-                        rabbitMqMsgProducer.sendSocketTeamMsg(msgVo);
+                        //rabbitMqMsgProducer.sendSocketTeamMsg(msgVo);
 
                 }else{
                     msgSendStatusVo.setStatus(false);

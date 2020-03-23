@@ -52,6 +52,7 @@ public class ProcessMeetMsg extends AbstractMsgProcessor {
                 msgVo.setCode(SocketMsgTypeEnum.TEAM_MSG);
                 msgVo.setSender(zzGroupMsg.getMsgSender());
                 msgVo.setReceiver(zzGroupMsg.getMsgReceiver());
+                msgVo.setId(msgId);
                 SocketMsgDetailVo detailVo = new SocketMsgDetailVo();
                 for(SocketMsgDetailTypeEnum senum:SocketMsgDetailTypeEnum.values()){
                     if(senum.getCode().equals(jsonObject.getString("code"))){
@@ -63,11 +64,11 @@ public class ProcessMeetMsg extends AbstractMsgProcessor {
                 detailVo.setData(Common.getJsonStringKeyValue(newMsg,"data"));
                 //msgVo.setMsg(newMsg);
                 msgVo.setMsg(detailVo);
-                //todo SocketMsgVo加密
+                //todo SocketDetailMsgVo加密
                 msgSendStatusVo.setMsg(msgVo);
                 //todo 发消息后期改成前端连接信息中心
                 //todo 测试使用
-                rabbitMqMsgProducer.sendSocketTeamMsg(msgVo);
+                //rabbitMqMsgProducer.sendSocketTeamMsg(msgVo);
             }else{
                 msgSendStatusVo.setStatus(false);
                 msgSendStatusVo.setContent("消息不能发送，包含如下涉密词汇："+messageSecretValidVo.getSecretWords());
@@ -114,7 +115,7 @@ public class ProcessMeetMsg extends AbstractMsgProcessor {
             msgSendStatusVo.setContent("群体绑定消息不合法");
             return msgSendStatusVo;
         }
-        //todo SocketMsgVo加密
+        //todo SocketDetailMsgVo加密
         rabbitMqMsgProducer.sendSocketTeamBindMsg(msgVo);
         return msgSendStatusVo;
     }

@@ -42,7 +42,7 @@ public class MessageType {
 
     //消息应答
     //消息应答码
-    public static final int MSG_ANSWER = 11;
+    public static final int MSG_SEND_ANSWER = 11;
     //成功
     public static final int SUCCESS_ANSWER = 200;
     //失败
@@ -144,20 +144,28 @@ public class MessageType {
      * 最后两位01说明接收人点开了和他聊天的界面,看见了所有消息
      * 目前因为前期编码未考虑，没有完全遵守该规则
      **/
+    /**群体消息**/
+    public static final String SOCKET_TEAM = "100000";
+    /**单人消息**/
+    public static final String SOCKET_SINGLE = "200000";
+    /**单人通知对方打开消息面包 通知发送人，接收人点开了和他聊天的界面,看见了所有消息**/
+    public static final String SOCKET_SINGLE_NOTE_SEEMSG = "200201";
+    //消息接收应答
+    public static final String MSG_RECEIVE_ANSWER = "200202";
+    //消息接收确认
+    public static final String MSG_RECEIVB_CONFIRM = "200203";
+    //离线消息
+    public static final String SOCKET_SINGLE_OFFLINE_MSG = "200301";
+    //握手反馈
+    public static final String SOCKET_SINGLE_HAND_SHAKE = "200401";
     /**群体socket群体绑定**/
     public static final String SOCKET_TEAM_BIND = "300000";
     /**群体列表socket群体绑定用户**/
     public static final String SOCKET_TEAM_BIND_LIST = "400000";
     /**群体socket绑定解除**/
-    public static final String SOCKET_TEAM_UNBIND = "600000";
-    /**单人消息**/
-    public static final String SOCKET_SINGLE = "200000";
-    //离线消息
-    public static final String SOCKET_SINGLE_OFFLINE_MSG = "200301";
-    /**单人通知对方打开消息面包 通知发送人，接收人点开了和他聊天的界面,看见了所有消息**/
-    public static final String SOCKET_SINGLE_NOTE_SEEMSG = "200201";
-    /**群体消息**/
-    public static final String SOCKET_TEAM = "100000";
+    public static final String SOCKET_TEAM_UNBIND = "500000";
+    /**信息中心编码，默认**/
+    public static final String SOCKET_DEFAULT = "999999";
     /**信息中心详细编码，默认**/
     public static final String SOCKET_DETAIL_DEFAULT = "999999";
 

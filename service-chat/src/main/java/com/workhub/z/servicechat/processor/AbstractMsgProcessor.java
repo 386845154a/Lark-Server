@@ -442,7 +442,7 @@ public class AbstractMsgProcessor {
     //应答消息重载加入 状态 和 应答内容
     public SocketMsgDetailVo msgAnswer(String msg, String nId, int status, String content) throws Exception {
         SocketMsgDetailVo detailVo = new SocketMsgDetailVo();
-        detailVo.setCode(SocketMsgDetailTypeEnum.PRIVATE_ANSWER);
+        detailVo.setCode(SocketMsgDetailTypeEnum.PRIVATE_SEND_ANSWER);
         MsgAnswerVo msgAnswerVO = new MsgAnswerVo();
         msgAnswerVO.setContactId((String)getJsonStringKeyValue(msg,"data.toId"));
         msgAnswerVO.setnId(nId);
