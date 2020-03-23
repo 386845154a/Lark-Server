@@ -878,5 +878,18 @@ public class Common {
         }
         return vo;
     }
-
+    /**
+     * 校验消息枚举重复
+     * @return
+     */
+    public static  boolean checkMsgEnumDuplicate()throws Exception{
+        List<String> codes = new ArrayList<>();
+        for(SocketMsgDetailTypeEnum tempEnum: SocketMsgDetailTypeEnum.values()){
+            if(codes.contains(tempEnum.getCode())){
+                throw new Exception("消息枚举重复，code："+tempEnum.getCode());
+            }
+            codes.add(tempEnum.getCode());
+        }
+        return true;
+    }
 }

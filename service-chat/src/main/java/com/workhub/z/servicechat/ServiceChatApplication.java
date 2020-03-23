@@ -40,6 +40,8 @@ public class ServiceChatApplication {
 
     public static void main(String[] args) throws Exception {
         SpringApplication.run(ServiceChatApplication.class, args);
+        //校验消息枚举重复
+        boolean msgEnumCheck = Common.checkMsgEnumDuplicate();
         if(restartServiceClearCache){
             //清理缓存
             try {
