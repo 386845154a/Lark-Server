@@ -1,7 +1,7 @@
 package com.workhub.z.servicechat.controller.config;
 
-import com.github.hollykunge.security.admin.api.dto.AdminUser;
 import com.github.hollykunge.security.common.msg.ObjectRestResponse;
+import com.workhub.z.servicechat.VO.ChatAdminUserVo;
 import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.config.EncryptionAndDeciphering;
 import com.workhub.z.servicechat.config.MessageType;
@@ -10,7 +10,6 @@ import com.workhub.z.servicechat.entity.group.ZzGroup;
 import com.workhub.z.servicechat.entity.group.ZzGroupFile;
 import com.workhub.z.servicechat.entity.group.ZzGroupStatus;
 import com.workhub.z.servicechat.feign.IFileUploadService;
-import com.workhub.z.servicechat.feign.IUserService;
 import com.workhub.z.servicechat.model.MeetingDto;
 import com.workhub.z.servicechat.rabbitMq.RabbitMqMsgProducer;
 import com.workhub.z.servicechat.service.*;
@@ -52,7 +51,7 @@ public class ZzFileManageController {
     @Autowired
     private ZzGroupService zzGroupService;
     @Autowired
-    private IUserService iUserService;
+    private AdminUserService iUserService;
     @Autowired
     private IFileUploadService iFileUploadService;
     @Autowired
@@ -350,7 +349,7 @@ public class ZzFileManageController {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            AdminUser userInfo = iUserService.getUserInfo(userId);
+            ChatAdminUserVo userInfo = iUserService.getUserInfo(userId);
             int require_approve_authority = zzRequireApproveAuthorityService.needApprove(userInfo.getOrgCode());
             //如果无需审批
             if(MessageType.NO_REQUIRE_APPROVE_AUTHORITY == require_approve_authority){

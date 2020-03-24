@@ -9,11 +9,11 @@ import com.workhub.z.servicechat.config.*;
 import com.workhub.z.servicechat.dao.ZzMeetingUserDao;
 import com.workhub.z.servicechat.entity.group.ZzGroupStatus;
 import com.workhub.z.servicechat.entity.meeting.ZzMeetingUser;
-import com.workhub.z.servicechat.feign.IUserService;
 import com.workhub.z.servicechat.model.MeetingDto;
 import com.workhub.z.servicechat.rabbitMq.RabbitMqMsgProducer;
 import com.workhub.z.servicechat.redis.RedisListUtil;
 import com.workhub.z.servicechat.redis.RedisUtil;
+import com.workhub.z.servicechat.service.AdminUserService;
 import com.workhub.z.servicechat.service.ZzMeetingService;
 import com.workhub.z.servicechat.service.ZzMeetingUserService;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public class ZzMeetingUserServiceImpl implements ZzMeetingUserService {
     @Resource
     private ZzMeetingService zzMeetingService;
     @Autowired
-    private IUserService iUserService;
+    private AdminUserService iUserService;
     @Resource
     private RabbitMqMsgProducer rabbitMqMsgProducer;
     /**添加成员单个*/
@@ -76,9 +76,9 @@ public class ZzMeetingUserServiceImpl implements ZzMeetingUserService {
         List<MeetUserVo> meetUserList = new ArrayList<>();
         for(Map map : oriList){
             MeetUserVo meetUserVo = new MeetUserVo();
-            AdminUser userInfo = iUserService.getUserInfo(Common.nulToEmptyString(map.get("USERID")));
+            ChatAdminUserVo userInfo = iUserService.getUserInfo(Common.nulToEmptyString(map.get("USERID")));
             if(userInfo == null ){
-                userInfo = new AdminUser();
+                userInfo = new ChatAdminUserVo();
             }
             meetUserVo.setUserId(Common.nulToEmptyString(map.get("USERID")));
             meetUserVo.setUserName(Common.nulToEmptyString(map.get("USERNAME")));
@@ -194,8 +194,8 @@ public class ZzMeetingUserServiceImpl implements ZzMeetingUserService {
      * @return 1成功 -1失败 0成员过多
      */
     public int editMeetUser(MeetingVo meetingVo, String userId, String userName,String userNo,String userIp){
-        List<AdminUser> addUserInfoList = null;
-        List<AdminUser> removeUserInfoList = null;
+        List<ChatAdminUserVo> addUserInfoList = null;
+        List<ChatAdminUserVo> removeUserInfoList = null;
         try {
             String meetId = meetingVo.getId();
             List<Map> userList = this.zzMeetingUserDao.getMeetAllUsers(meetId);
@@ -228,7 +228,7 @@ public class ZzMeetingUserServiceImpl implements ZzMeetingUserService {
                             userVo = nowUserList.get(j);
                         }
                     }
-                    AdminUser userInfo = this.iUserService.getUserInfo(addUserList.get(i));
+                    ChatAdminUserVo userInfo = this.iUserService.getUserInfo(addUserList.get(i));
                     ZzMeetingUser zzMeetingUser = new ZzMeetingUser();
                     zzMeetingUser.setId(RandomId.getUUID());
                     zzMeetingUser.setMeetingId(meetId);
@@ -265,7 +265,7 @@ public class ZzMeetingUserServiceImpl implements ZzMeetingUserService {
                 addUserInfoList =  iUserService.userList(Joiner.on(",").join(addUserList));
                 String userNames = "";
                 String userIds = "";
-                for (AdminUser userInfo:addUserInfoList){
+                for (ChatAdminUserVo userInfo:addUserInfoList){
                     msgUserList.add(userInfo.getId());
                     userNames += ","+userInfo.getName();
                     userIds += ","+userInfo.getId();
@@ -324,7 +324,7 @@ public class ZzMeetingUserServiceImpl implements ZzMeetingUserService {
                 removeUserInfoList = iUserService.userList(Joiner.on(",").join(delUserList));
                 String userNames = "";
                 String userIds = "";
-                for (AdminUser userInfo:removeUserInfoList){
+                for (ChatAdminUserVo userInfo:removeUserInfoList){
                     msgUserList2.add(userInfo.getId());
                     userNames += ","+userInfo.getName();
                     userIds += ","+userInfo.getId();
@@ -381,7 +381,7 @@ public class ZzMeetingUserServiceImpl implements ZzMeetingUserService {
             //事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             if(addUserInfoList!=null){
-                for (AdminUser userInfo:addUserInfoList){
+                for (ChatAdminUserVo userInfo:addUserInfoList){
                     //redis 缓存处理 把脏数据删除
                     String key = CacheConst.userMeetIds+":"+userInfo.getId();
                     boolean keyExist = RedisUtil.isKeyExist(key);
@@ -393,7 +393,7 @@ public class ZzMeetingUserServiceImpl implements ZzMeetingUserService {
                 }
             }
             if(removeUserInfoList!=null){
-                for (AdminUser userInfo:removeUserInfoList){
+                for (ChatAdminUserVo userInfo:removeUserInfoList){
                     //redis 缓存处理 把用户脏数据删除
                     String key = CacheConst.userMeetIds+":"+userInfo.getId();
                     boolean keyExist = RedisUtil.isKeyExist(key);

@@ -2,7 +2,6 @@ package com.workhub.z.servicechat.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.github.hollykunge.security.admin.api.dto.AdminUser;
 import com.github.hollykunge.security.common.exception.BaseException;
 import com.github.hollykunge.security.common.msg.ObjectRestResponse;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
@@ -16,13 +15,13 @@ import com.workhub.z.servicechat.dao.ZzUserGroupDao;
 import com.workhub.z.servicechat.entity.group.ZzGroup;
 import com.workhub.z.servicechat.entity.group.ZzGroupStatus;
 import com.workhub.z.servicechat.entity.group.ZzUserGroup;
-import com.workhub.z.servicechat.feign.IUserService;
 import com.workhub.z.servicechat.model.GroupEditDto;
 import com.workhub.z.servicechat.model.GroupEditUserList;
 import com.workhub.z.servicechat.model.UserListDto;
 import com.workhub.z.servicechat.rabbitMq.RabbitMqMsgProducer;
 import com.workhub.z.servicechat.redis.RedisListUtil;
 import com.workhub.z.servicechat.redis.RedisUtil;
+import com.workhub.z.servicechat.service.AdminUserService;
 import com.workhub.z.servicechat.service.ZzGroupService;
 import com.workhub.z.servicechat.service.ZzGroupStatusService;
 import com.workhub.z.servicechat.service.ZzUserGroupService;
@@ -38,10 +37,10 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.workhub.z.servicechat.config.Common.putEntityNullToEmptyString;
 import static com.workhub.z.servicechat.config.MessageType.HIGH_SECRECT_LEVEL;
 import static com.workhub.z.servicechat.config.MessageType.NORMAL_SECRECT_LEVEL;
 import static com.workhub.z.servicechat.config.RandomId.getUUID;
-import static com.workhub.z.servicechat.config.Common.putEntityNullToEmptyString;
 
 /**
  * 群组表(ZzGroup)表服务实现类
@@ -59,7 +58,7 @@ public class ZzGroupServiceImpl implements ZzGroupService {
     private ZzUserGroupDao zzUserGroupDao;
 
     @Autowired
-    private IUserService iUserService;
+    private AdminUserService iUserService;
     @Autowired
     private RabbitMqMsgProducer rabbitMqMsgProducer;
     @Autowired
@@ -254,7 +253,7 @@ public class ZzGroupServiceImpl implements ZzGroupService {
         List<GroupVo> dataList =this.zzGroupDao.groupListMonitoring(params);
         //null的String类型属性转换空字符串
         Common.putVoNullStringToEmptyString(dataList);
-        AdminUser userInfo=null;
+        ChatAdminUserVo userInfo=null;
         for(GroupVo groupVO:dataList){
             userInfo=iUserService.getUserInfo(Common.nulToEmptyString(groupVO.getCreator()));
             groupVO.setCreatorName(userInfo==null?"":userInfo.getName());
@@ -349,8 +348,8 @@ public class ZzGroupServiceImpl implements ZzGroupService {
     @Transactional(rollbackFor={RuntimeException.class, Exception.class})
     public int groupMemberEdit(GroupEditDto groupEditDto, String userId, String userName){
 
-        List<AdminUser> addUserInfoList = null;
-        List<AdminUser> removeUserInfoList = null;
+        List<ChatAdminUserVo> addUserInfoList = null;
+        List<ChatAdminUserVo> removeUserInfoList = null;
         try {
             String groupId = groupEditDto.getGroupId();
             List<GroupEditUserList> userListDtos = groupEditDto.getUserList();
@@ -399,7 +398,7 @@ public class ZzGroupServiceImpl implements ZzGroupService {
                 addUserInfoList = iUserService.userList(Joiner.on(",").join(addUserList));
                 String userNames = "";
                 String userIds = "";
-                for (AdminUser userInfo:addUserInfoList){
+                for (ChatAdminUserVo userInfo:addUserInfoList){
                     msgUserList.add(userInfo.getId());
                     userNames += ","+userInfo.getName();
                     userIds += ","+userInfo.getId();
@@ -457,7 +456,7 @@ public class ZzGroupServiceImpl implements ZzGroupService {
                 removeUserInfoList = iUserService.userList(Joiner.on(",").join(delUserList));
                 String userNames = "";
                 String userIds = "";
-                for (AdminUser userInfo:removeUserInfoList){
+                for (ChatAdminUserVo userInfo:removeUserInfoList){
                     msgUserList2.add(userInfo.getId());
                     userNames += ","+userInfo.getName();
                     userIds += ","+userInfo.getId();
@@ -512,7 +511,7 @@ public class ZzGroupServiceImpl implements ZzGroupService {
             log.error(Common.getExceptionMessage(e));
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             if(addUserInfoList!=null){
-                for (AdminUser userInfo:addUserInfoList){
+                for (ChatAdminUserVo userInfo:addUserInfoList){
                     //redis 缓存处理 把用户脏数据删除
                     String key = CacheConst.userGroupIds+":"+userInfo.getId();
                     boolean keyExist = RedisUtil.isKeyExist(key);
@@ -525,7 +524,7 @@ public class ZzGroupServiceImpl implements ZzGroupService {
             if(removeUserInfoList!=null){
 
             }
-            for (AdminUser userInfo:removeUserInfoList){
+            for (ChatAdminUserVo userInfo:removeUserInfoList){
                 //redis 缓存处理 把脏数据删除
                 String key = CacheConst.userGroupIds+":"+userInfo.getId();
                 boolean keyExist = RedisUtil.isKeyExist(key);
@@ -571,7 +570,7 @@ public class ZzGroupServiceImpl implements ZzGroupService {
             zzGroupInfo.setGroupName(jsonObject.getString("groupName"));
             zzGroupInfo.setCreator(jsonObject.getString("creator"));
             zzGroupInfo.setGroupOwnerId(jsonObject.getString("creator"));
-            AdminUser userInfo = iUserService.getUserInfo(jsonObject.getString("creator"));
+            ChatAdminUserVo userInfo = iUserService.getUserInfo(jsonObject.getString("creator"));
             if(userInfo!=null){
                 zzGroupInfo.setCreatorName(Common.nulToEmptyString(userInfo.getName()));
                 zzGroupInfo.setGroupOwnerName(Common.nulToEmptyString(userInfo.getName()));

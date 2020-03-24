@@ -12,15 +12,11 @@ import com.workhub.z.servicechat.config.*;
 import com.workhub.z.servicechat.dao.ZzGroupApproveDao;
 import com.workhub.z.servicechat.entity.group.ZzGroupApprove;
 import com.workhub.z.servicechat.entity.group.ZzGroupApproveLog;
-import com.workhub.z.servicechat.feign.IUserService;
 import com.workhub.z.servicechat.processor.ProcessEditGroup;
 import com.workhub.z.servicechat.rabbitMq.RabbitMqMsgProducer;
 import com.workhub.z.servicechat.redis.RedisListUtil;
 import com.workhub.z.servicechat.redis.RedisUtil;
-import com.workhub.z.servicechat.service.ZzGroupApproveLogService;
-import com.workhub.z.servicechat.service.ZzGroupApproveService;
-import com.workhub.z.servicechat.service.ZzGroupService;
-import com.workhub.z.servicechat.service.ZzMeetingService;
+import com.workhub.z.servicechat.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +43,7 @@ public class ZzGroupApproveServiceImpl implements ZzGroupApproveService {
     @Autowired
     private ProcessEditGroup processEditGroup;
     @Autowired
-    private IUserService iUserService;
+    private AdminUserService iUserService;
     @Resource
     private ZzGroupApproveLogService zzGroupApproveLogService;
     @Resource
@@ -68,7 +64,7 @@ public class ZzGroupApproveServiceImpl implements ZzGroupApproveService {
     @Override
     public Map<String,String> approve(Map params){
         ZzGroupApproveLog approveLog = new ZzGroupApproveLog();
-        AdminUser userInfo0 = iUserService.getUserInfo(params.get("userId").toString());
+        ChatAdminUserVo userInfo0 = iUserService.getUserInfo(params.get("userId").toString());
         params.put("userNo", Common.nulToEmptyString(userInfo0.getPId()));
         //是否已经审批了
         String ifApproveFlg = this.zzGroupApproveDao.ifApprove(params);

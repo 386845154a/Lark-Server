@@ -1,16 +1,16 @@
 package com.workhub.z.servicechat.service.impl;
 
-import com.github.hollykunge.security.admin.api.dto.AdminUser;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.workhub.z.servicechat.VO.ChatAdminUserVo;
 import com.workhub.z.servicechat.VO.MegReadLogVo;
 import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.dao.ZzGroupDao;
+import com.workhub.z.servicechat.dao.ZzMegReadLogDao;
 import com.workhub.z.servicechat.entity.group.ZzGroup;
 import com.workhub.z.servicechat.entity.message.ZzMegReadLog;
-import com.workhub.z.servicechat.dao.ZzMegReadLogDao;
-import com.workhub.z.servicechat.feign.IUserService;
+import com.workhub.z.servicechat.service.AdminUserService;
 import com.workhub.z.servicechat.service.ZzMegReadLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ import java.util.List;
 public class ZzMegReadLogServiceImpl implements ZzMegReadLogService {
     private static Logger log = LoggerFactory.getLogger(ZzMessageInfoServiceImpl.class);
     @Autowired
-    private IUserService userService;
+    private AdminUserService userService;
     @Resource
     private ZzMegReadLogDao zzMegReadLogDao;
     @Resource
@@ -118,7 +118,7 @@ public class ZzMegReadLogServiceImpl implements ZzMegReadLogService {
             megReadLogVO.setId(data.getId());
             megReadLogVO.setReadtime(data.getReadtime());
             megReadLogVO.setSender(data.getSender());
-            AdminUser userInfo = userService.getUserInfo(data.getSender());
+            ChatAdminUserVo userInfo = userService.getUserInfo(data.getSender());
             if (userInfo.getId() != null){
                 megReadLogVO.setSenderName(userInfo.getName());
                 megReadLogVO.setSenderSN(userInfo.getPId());
@@ -127,7 +127,7 @@ public class ZzMegReadLogServiceImpl implements ZzMegReadLogService {
                 megReadLogVO.setSenderName(groupinfo.getGroupName());
                 megReadLogVO.setSenderSN(groupinfo.getGroupId());
             }
-            AdminUser userinfo1 = userService.getUserInfo(data.getReviser());
+            ChatAdminUserVo userinfo1 = userService.getUserInfo(data.getReviser());
             megReadLogVO.setReviser(data.getReviser());
             megReadLogVO.setReviserName(userinfo1.getName());
             megReadLogVO.setReviserSN(userinfo1.getPId());

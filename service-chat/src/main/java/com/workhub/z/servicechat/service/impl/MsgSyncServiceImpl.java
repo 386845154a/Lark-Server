@@ -1,12 +1,13 @@
 package com.workhub.z.servicechat.service.impl;
 
 import com.github.hollykunge.security.admin.api.dto.AdminUser;
+import com.workhub.z.servicechat.VO.ChatAdminUserVo;
 import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.dao.MsgSyncDao;
 import com.workhub.z.servicechat.dao.ZzContactDao;
 import com.workhub.z.servicechat.entity.ZzContactInf;
 import com.workhub.z.servicechat.entity.message.ZzMessageInfo;
-import com.workhub.z.servicechat.feign.IUserService;
+import com.workhub.z.servicechat.service.AdminUserService;
 import com.workhub.z.servicechat.service.MsgSyncService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ public class MsgSyncServiceImpl implements MsgSyncService {
     @Autowired
     ZzContactDao zzContactDao;
     @Autowired
-    IUserService iUserService;
+    AdminUserService iUserService;
 
     /**
      * 0同步出错
@@ -87,9 +88,9 @@ public class MsgSyncServiceImpl implements MsgSyncService {
                         zzContactInfSender.setName(Common.nulToEmptyString(Common.getJsonStringKeyValue(message, "username")));
                         zzContactInfSender.setMemberNum("2");
                         zzContactInfSender.setGroupOwner("");
-                        AdminUser userSenderInf = this.iUserService.getUserInfo(sender);
+                        ChatAdminUserVo userSenderInf = this.iUserService.getUserInfo(sender);
                         if (userSenderInf == null) {
-                            userSenderInf = new AdminUser();
+                            userSenderInf = new ChatAdminUserVo();
                             Common.putVoNullStringToEmptyString(userSenderInf);
                         }
                         zzContactInfSender.setLevels(userSenderInf.getSecretLevel());
@@ -111,9 +112,9 @@ public class MsgSyncServiceImpl implements MsgSyncService {
                             zzContactInfReceiver.setMemberNum(Common.nulToEmptyString(Common.getJsonStringKeyValue(message, "contactInfo.memberNum")));
                             zzContactInfReceiver.setGroupOwner(Common.nulToEmptyString(Common.getJsonStringKeyValue(message, "contactInfo.groupOwnerId")));
                         } else if ("USER".equals(type)) {
-                            AdminUser userReceiverInf = this.iUserService.getUserInfo(receiver);
+                            ChatAdminUserVo userReceiverInf = this.iUserService.getUserInfo(receiver);
                             if (userReceiverInf == null) {
-                                userReceiverInf = new AdminUser();
+                                userReceiverInf = new ChatAdminUserVo();
                                 Common.putVoNullStringToEmptyString(userReceiverInf);
                             }
                             zzContactInfReceiver.setLevels(userReceiverInf.getSecretLevel());

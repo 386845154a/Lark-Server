@@ -2,7 +2,6 @@ package com.workhub.z.servicechat.processor;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.github.hollykunge.security.admin.api.dto.AdminUser;
 import com.workhub.z.servicechat.VO.*;
 import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.config.ImageUtil;
@@ -10,10 +9,10 @@ import com.workhub.z.servicechat.config.SocketMsgDetailTypeEnum;
 import com.workhub.z.servicechat.config.SocketMsgTypeEnum;
 import com.workhub.z.servicechat.entity.group.ZzGroup;
 import com.workhub.z.servicechat.entity.group.ZzUserGroup;
-import com.workhub.z.servicechat.feign.IUserService;
 import com.workhub.z.servicechat.model.GroupTaskDto;
 import com.workhub.z.servicechat.model.UserListDto;
 import com.workhub.z.servicechat.rabbitMq.RabbitMqMsgProducer;
+import com.workhub.z.servicechat.service.AdminUserService;
 import com.workhub.z.servicechat.service.ZzGroupService;
 import com.workhub.z.servicechat.service.ZzGroupStatusService;
 import com.workhub.z.servicechat.service.ZzUserGroupService;
@@ -41,7 +40,7 @@ public class ProcessEditGroup extends AbstractMsgProcessor {
     @Autowired
     ZzGroupService groupService;
     @Autowired
-    private IUserService iUserService;
+    private AdminUserService iUserService;
     @Autowired
     private ZzGroupStatusService zzGroupStatusService;
     @Autowired
@@ -175,7 +174,7 @@ public class ProcessEditGroup extends AbstractMsgProcessor {
         zzGroupInfo.setGroupName(groupJson.getString("groupName"));
         zzGroupInfo.setCreator(groupJson.getString("creator"));
         zzGroupInfo.setGroupOwnerId(groupJson.getString("creator"));
-        AdminUser userInfo = iUserService.getUserInfo(groupJson.getString("creator"));
+        ChatAdminUserVo userInfo = iUserService.getUserInfo(groupJson.getString("creator"));
         if(userInfo!=null){
             zzGroupInfo.setCreatorName(Common.nulToEmptyString(userInfo.getName()));
             zzGroupInfo.setGroupOwnerName(Common.nulToEmptyString(userInfo.getName()));

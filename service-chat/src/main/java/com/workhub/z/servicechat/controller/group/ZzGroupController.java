@@ -1,7 +1,6 @@
 package com.workhub.z.servicechat.controller.group;
 
 import com.alibaba.fastjson.JSONArray;
-import com.github.hollykunge.security.admin.api.dto.AdminUser;
 import com.github.hollykunge.security.common.msg.ListRestResponse;
 import com.github.hollykunge.security.common.msg.ObjectRestResponse;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
@@ -13,10 +12,10 @@ import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.config.MessageType;
 import com.workhub.z.servicechat.config.RandomId;
 import com.workhub.z.servicechat.entity.group.ZzGroup;
-import com.workhub.z.servicechat.feign.IUserService;
 import com.workhub.z.servicechat.model.GroupEditDto;
 import com.workhub.z.servicechat.model.GroupEditUserList;
 import com.workhub.z.servicechat.redis.RedisUtil;
+import com.workhub.z.servicechat.service.AdminUserService;
 import com.workhub.z.servicechat.service.ZzGroupService;
 import com.workhub.z.servicechat.service.ZzMessageInfoService;
 import com.workhub.z.servicechat.service.ZzUserGroupService;
@@ -56,7 +55,7 @@ public class ZzGroupController  {
     private ZzMessageInfoService messageInfoService;
 
     @Autowired
-    private IUserService iUserService;
+    private AdminUserService iUserService;
     @Autowired
     private HttpServletRequest request;
     /**
@@ -314,9 +313,9 @@ public class ZzGroupController  {
     public ListRestResponse getGroupUserList(@RequestParam("groupId")String groupId) throws Exception {
 
         String userIds= this.zzGroupService.getGroupUserList(groupId);
-        List<AdminUser> list  = iUserService.userList(userIds);
+        List<ChatAdminUserVo> list  = iUserService.userList(userIds);
         List<UserInfoVo> dataList = new ArrayList<>();
-        for(AdminUser userTemp:list){
+        for(ChatAdminUserVo userTemp:list){
             UserInfoVo vo = new UserInfoVo();
             vo.setId(userTemp.getId());
             vo.setName(userTemp.getName());
@@ -444,7 +443,7 @@ public class ZzGroupController  {
     @GetMapping("getAllGroupInfo")
     public ObjectRestResponse getAllGroupInfo(@RequestParam String groupId) throws Exception{
         String userIds= this.zzGroupService.getGroupUserList(groupId);
-        List<AdminUser> list  = iUserService.userList(userIds);
+        List<ChatAdminUserVo> list  = iUserService.userList(userIds);
         ObjectRestResponse objectRestResponse = new ObjectRestResponse();
         ZzGroup groupInfo = new ZzGroup();
         groupInfo = this.zzGroupService.queryById(groupId);

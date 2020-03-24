@@ -14,15 +14,18 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScans;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.context.request.RequestContextListener;
 
 @SpringBootApplication
-@EnableFeignClients
+@EnableFeignClients({"com.github.hollykunge.security","com.workhub.z.servicechat.feign"})
 @EnableDiscoveryClient
 @MapperScan("com.workhub.z.servicechat.dao")
 @EnableTransactionManagement
 @EnableCaching
+@ComponentScan({"com.workhub.z.servicechat.*","com.github.hollykunge.security.admin.api.*"})
 public class ServiceChatApplication {
     static Logger logger = LoggerFactory.getLogger(ServiceChatApplication.class);
     //是否清理缓存

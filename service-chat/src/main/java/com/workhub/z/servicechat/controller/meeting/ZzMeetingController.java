@@ -7,7 +7,7 @@ import com.workhub.z.servicechat.VO.MeetingVo;
 import com.workhub.z.servicechat.config.Common;
 import com.workhub.z.servicechat.config.RandomId;
 import com.workhub.z.servicechat.entity.meeting.ZzMeeting;
-import com.workhub.z.servicechat.feign.IUserService;
+import com.workhub.z.servicechat.service.AdminUserService;
 import com.workhub.z.servicechat.service.ZzMeetingService;
 import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ public class ZzMeetingController {
     @Resource
     private HttpServletRequest request;
     @Resource
-    private IUserService iUserService;
+    private AdminUserService iUserService;
 /**
 * @MethodName: add
  * @Description: 新增会议

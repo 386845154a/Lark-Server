@@ -1,7 +1,6 @@
 package com.workhub.z.servicechat.processor;
 
 import com.alibaba.fastjson.JSONObject;
-import com.github.hollykunge.security.admin.api.dto.AdminUser;
 import com.workhub.z.servicechat.VO.*;
 import com.workhub.z.servicechat.config.*;
 import com.workhub.z.servicechat.entity.ZzContactInf;
@@ -12,7 +11,6 @@ import com.workhub.z.servicechat.entity.group.ZzGroupStatus;
 import com.workhub.z.servicechat.entity.message.ZzMegReadLog;
 import com.workhub.z.servicechat.entity.message.ZzMessageInfo;
 import com.workhub.z.servicechat.entity.message.ZzMsgReadRelation;
-import com.workhub.z.servicechat.feign.IUserService;
 import com.workhub.z.servicechat.model.MeetingDto;
 import com.workhub.z.servicechat.rabbitMq.RabbitMqMsgProducer;
 import com.workhub.z.servicechat.service.*;
@@ -41,7 +39,7 @@ public class AbstractMsgProcessor {
     @Autowired
     ZzMessageInfoService messageInfoService;
     @Autowired
-    IUserService iUserService;
+    AdminUserService iUserService;
     @Autowired
     ZzGroupService zzGroupService;
     @Autowired
@@ -329,9 +327,9 @@ public class AbstractMsgProcessor {
             MeetingDto group = zzMeetingService.getMeetInf(receiver);
             iscross = group.getIscross();
         }else{//如果是私聊消息
-            List<AdminUser> userInfoList = iUserService.userList(sender+","+receiver);
-            AdminUser senderInf = userInfoList.get(0)==null?new AdminUser():userInfoList.get(0);
-            AdminUser receiveInf = userInfoList.get(1)==null?new AdminUser():userInfoList.get(1);
+            List<ChatAdminUserVo> userInfoList = iUserService.userList(sender+","+receiver);
+            ChatAdminUserVo senderInf = userInfoList.get(0)==null?new ChatAdminUserVo():userInfoList.get(0);
+            ChatAdminUserVo receiveInf = userInfoList.get(1)==null?new ChatAdminUserVo():userInfoList.get(1);
             String senderOrg = Common.nulToEmptyString(senderInf.getOrgCode());
             String receiverOrg = Common.nulToEmptyString(receiveInf.getOrgCode());
             //以下逻辑照搬admin服务OrgBiz的getOrgUsers方法
@@ -383,9 +381,9 @@ public class AbstractMsgProcessor {
             zzContactInfSender.setName(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"username")));
             zzContactInfSender.setMemberNum("2");
             zzContactInfSender.setGroupOwner("");
-            AdminUser userSenderInf = this.iUserService.getUserInfo(sender);
+            ChatAdminUserVo userSenderInf = this.iUserService.getUserInfo(sender);
             if(userSenderInf == null){
-                userSenderInf = new AdminUser();
+                userSenderInf = new ChatAdminUserVo();
                 Common.putVoNullStringToEmptyString(userSenderInf);
             }
             zzContactInfSender.setLevels(userSenderInf.getSecretLevel());
@@ -406,9 +404,9 @@ public class AbstractMsgProcessor {
                 zzContactInfReceiver.setMemberNum(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"contactInfo.memberNum")));
                 zzContactInfReceiver.setGroupOwner(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"contactInfo.groupOwnerId")));
             }else if("USER".equals(type)){
-                AdminUser userReceiverInf = this.iUserService.getUserInfo(receiver);
+                ChatAdminUserVo userReceiverInf = this.iUserService.getUserInfo(receiver);
                 if(userReceiverInf == null){
-                    userReceiverInf = new AdminUser();
+                    userReceiverInf = new ChatAdminUserVo();
                     Common.putVoNullStringToEmptyString(userReceiverInf);
                 }
                 zzContactInfReceiver.setLevels(userReceiverInf.getSecretLevel());
