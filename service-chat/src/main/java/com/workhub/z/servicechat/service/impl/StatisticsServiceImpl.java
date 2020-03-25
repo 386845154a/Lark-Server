@@ -3,6 +3,7 @@ package com.workhub.z.servicechat.service.impl;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.workhub.z.servicechat.VO.StatisticsFileVo;
 import com.workhub.z.servicechat.VO.StatisticsGroupVo;
 import com.workhub.z.servicechat.VO.StatisticsMsgVo;
 import com.workhub.z.servicechat.dao.StatisticsDao;
@@ -50,5 +51,13 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public StatisticsMsgVo msgStatistics() {
         return this.statisticsDao.msgStatistics();
+    }
+    /**
+     * 附件统计
+     * @return
+     */
+    @Override
+    public StatisticsFileVo fileStatistics() {
+        return this.statisticsDao.fileStatistics();
     }
 }

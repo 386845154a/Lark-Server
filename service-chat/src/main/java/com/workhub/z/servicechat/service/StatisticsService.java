@@ -1,6 +1,7 @@
 package com.workhub.z.servicechat.service;
 
 import com.github.hollykunge.security.common.msg.TableResultResponse;
+import com.workhub.z.servicechat.VO.StatisticsFileVo;
 import com.workhub.z.servicechat.VO.StatisticsGroupVo;
 import com.workhub.z.servicechat.VO.StatisticsMsgVo;
 
@@ -24,4 +25,9 @@ public interface StatisticsService {
      * @return
      */
      StatisticsMsgVo msgStatistics() ;
+    /**
+     * 附件统计
+     * @return
+     */
+    StatisticsFileVo fileStatistics() ;
 }

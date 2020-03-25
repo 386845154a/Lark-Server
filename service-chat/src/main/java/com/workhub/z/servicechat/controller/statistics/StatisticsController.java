@@ -2,6 +2,7 @@ package com.workhub.z.servicechat.controller.statistics;
 
 import com.github.hollykunge.security.common.msg.ObjectRestResponse;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
+import com.workhub.z.servicechat.VO.StatisticsFileVo;
 import com.workhub.z.servicechat.VO.StatisticsGroupVo;
 import com.workhub.z.servicechat.VO.StatisticsMsgVo;
 import com.workhub.z.servicechat.service.StatisticsService;
@@ -39,12 +40,21 @@ public class StatisticsController {
     }
 
     /**
-     * 群统计
+     * 消息统计
      * @return
      */
     @GetMapping("msgStatistics")
-    public ObjectRestResponse<StatisticsGroupVo> msgStatistics(){
+    public ObjectRestResponse<StatisticsMsgVo> msgStatistics(){
         StatisticsMsgVo msgVo =  this.statisticsService.msgStatistics();
         return new ObjectRestResponse<>().rel(true).msg("200").data(msgVo);
+    }
+    /**
+     * 附件统计
+     * @return
+     */
+    @GetMapping("fileStatistics")
+    public ObjectRestResponse<StatisticsFileVo> fileStatistics(){
+        StatisticsFileVo fileVo =  this.statisticsService.fileStatistics();
+        return new ObjectRestResponse<>().rel(true).msg("200").data(fileVo);
     }
 }
