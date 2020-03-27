@@ -1,7 +1,6 @@
 package com.workhub.z.servicechat.controller.message;
 
 import com.github.hollykunge.security.common.msg.ObjectRestResponse;
-import com.workhub.z.servicechat.VO.StatisticsGroupVo;
 import com.workhub.z.servicechat.service.MsgSyncService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +22,7 @@ public class MsgSyncController {
      * @return
      */
     @GetMapping("sync")
-    public ObjectRestResponse<StatisticsGroupVo> msgStatistics(){
+    public ObjectRestResponse msgStatistics(){
         int i = msgSyncService.syncMsg();
         if(i==0){
             return new ObjectRestResponse<>().rel(false).msg("500").data("error");
