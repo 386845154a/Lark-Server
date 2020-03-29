@@ -1,6 +1,7 @@
 package com.workhub.z.servicechat.dao;
 
 import com.workhub.z.servicechat.model.StatisticsChartDto;
+import com.workhub.z.servicechat.model.StatisticsGroupUserDto;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -35,4 +36,5 @@ public interface StatisticsDao {
      * @return
      */
     List<StatisticsChartDto> getXLabel(@Param("orgCode")String orgCode);
+    List<StatisticsGroupUserDto> groupUserStatistics(@Param("groupId")String groupId);
 }
