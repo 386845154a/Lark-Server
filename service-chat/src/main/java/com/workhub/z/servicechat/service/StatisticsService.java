@@ -1,6 +1,7 @@
 package com.workhub.z.servicechat.service;
 
 import com.workhub.z.servicechat.VO.StatisticsChartDataVo;
+import com.workhub.z.servicechat.VO.StatisticsGroupOrgVo;
 import com.workhub.z.servicechat.VO.StatisticsGroupUserVo;
 
 import java.util.List;
@@ -36,4 +37,9 @@ public interface StatisticsService {
      * @return
      */
     List<StatisticsGroupUserVo> groupUserStatistics(String groupId);
+    /**
+     * 群org统计
+     * @return
+     */
+    List<StatisticsGroupOrgVo> groupOrgStatistics(String groupId);
 }
