@@ -42,6 +42,12 @@ public class ProcessMeetMsg extends AbstractMsgProcessor {
             }
             //判断涉密词汇end
             if(messageSecretValidVo.getSendStatus().equals("1")){
+                //校验长度
+                if(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.title")).length()>300){
+                    msgSendStatusVo.setStatus(false);
+                    msgSendStatusVo.setContent("消息不能发送，超过最大字数限制300");
+                    return msgSendStatusVo;
+                }
                 //存储消息信息（新）
                 String msgId = super.saveMessageInfo("MEET",ip,msg);
                 msgSendStatusVo.setId(msgId);

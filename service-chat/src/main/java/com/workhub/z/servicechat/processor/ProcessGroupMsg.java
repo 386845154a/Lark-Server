@@ -60,6 +60,12 @@ public class ProcessGroupMsg extends AbstractMsgProcessor {
 
             if(userGroupService.queryInGroup(zzGroupMsg.getMsgSender(),zzGroupMsg.getMsgReceiver())>0) {
                 if(messageSecretValidVo.getSendStatus().equals("1")){//如果可以发送消息
+                        //校验长度
+                        if(Common.nulToEmptyString(Common.getJsonStringKeyValue(message,"content.title")).length()>300){
+                            msgSendStatusVo.setStatus(false);
+                            msgSendStatusVo.setContent("消息不能发送，超过最大字数限制300");
+                            return msgSendStatusVo;
+                        }
                         saveMsg(zzGroupMsg);
                         //存储消息信息（新）
                         String msgId = super.saveMessageInfo("GROUP",ip,msg);
