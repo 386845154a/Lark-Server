@@ -73,11 +73,13 @@
                         </if>
                         <if test = "dateType=='2'|| dateType==2">
                             <!--本周-->
-                            and to_char(CREATETIME,'yyyy-mm-dd') between to_char((select trunc(sysdate, 'd') + 1 from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')
+                            <!--and to_char(CREATETIME,'yyyy-mm-dd') between to_char((select trunc(sysdate, 'd') + 1 from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')-->
+                            and to_char(CREATETIME,'yyyy-mm-dd') between to_char((select TRUNC(SYSDATE - 7)   from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')
                         </if>
                         <if test = "dateType=='3'|| dateType==3">
                             <!--本月-->
-                          and to_char(CREATETIME,'yyyy-mm-dd') between to_char((select trunc(sysdate, 'mm') from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')
+                           <!-- and to_char(CREATETIME,'yyyy-mm-dd') between to_char((select trunc(sysdate, 'mm') from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')-->
+                            and to_char(CREATETIME,'yyyy-mm-dd') between to_char((select TRUNC(SYSDATE - 30)   from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')
                         </if>
                         group by m.sender) a,
                        (select org_name, org_code, id
@@ -167,11 +169,13 @@
         </if>
         <if test = "dateType=='2'|| dateType==2">
             <!--本周-->
-            and to_char(CREATE_TIME,'yyyy-mm-dd') between to_char((select trunc(sysdate, 'd') + 1 from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')
+            <!-- and to_char(CREATE_TIME,'yyyy-mm-dd') between to_char((select trunc(sysdate, 'd') + 1 from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd') -->
+            and to_char(CREATE_TIME,'yyyy-mm-dd') between to_char((select TRUNC(SYSDATE - 7)   from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')
+
         </if>
         <if test = "dateType=='3'|| dateType==3">
             <!--本月-->
-            and to_char(CREATE_TIME,'yyyy-mm-dd') between to_char((select trunc(sysdate, 'mm') from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')
+            and to_char(CREATE_TIME,'yyyy-mm-dd') between to_char((select TRUNC(SYSDATE - 30)   from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')
         </if>
         group by m.creator) a,
         (select org_name, org_code, id
@@ -233,11 +237,13 @@
         </if>
         <if test = "dateType=='2'|| dateType==2">
             <!--本周-->
-            and to_char(CREATE_TIME,'yyyy-mm-dd') between to_char((select trunc(sysdate, 'd') + 1 from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')
+            <!--and to_char(CREATE_TIME,'yyyy-mm-dd') between to_char((select trunc(sysdate, 'd') + 1 from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')-->
+            and to_char(CREATE_TIME,'yyyy-mm-dd') between to_char((select TRUNC(SYSDATE - 7)   from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')
         </if>
         <if test = "dateType=='3'|| dateType==3">
             <!--本月-->
-            and to_char(CREATE_TIME,'yyyy-mm-dd') between to_char((select trunc(sysdate, 'mm') from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')
+            <!--and to_char(CREATE_TIME,'yyyy-mm-dd') between to_char((select trunc(sysdate, 'mm') from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')-->
+            and to_char(CREATE_TIME,'yyyy-mm-dd') between to_char((select TRUNC(SYSDATE - 30)   from dual),'yyyy-mm-dd') and to_char(sysdate,'yyyy-mm-dd')
         </if>
         group by m.creator) a,
         (select org_name, org_code, id
