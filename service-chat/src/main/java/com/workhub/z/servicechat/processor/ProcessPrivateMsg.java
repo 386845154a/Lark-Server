@@ -5,14 +5,15 @@ import com.workhub.z.servicechat.VO.MessageSecretValidVo;
 import com.workhub.z.servicechat.VO.MsgSendStatusVo;
 import com.workhub.z.servicechat.VO.SocketMsgDetailVo;
 import com.workhub.z.servicechat.VO.SocketMsgVo;
-import com.workhub.z.servicechat.config.Common;
-import com.workhub.z.servicechat.config.MessageType;
-import com.workhub.z.servicechat.config.SocketMsgDetailTypeEnum;
-import com.workhub.z.servicechat.config.SocketMsgTypeEnum;
+import com.workhub.z.servicechat.config.*;
 import com.workhub.z.servicechat.entity.message.ZzPrivateMsg;
 import com.workhub.z.servicechat.service.ZzPrivateMsgService;
+import com.workhub.z.servicechat.service.impl.ZzUserOnlineServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.workhub.z.servicechat.config.Common.getJsonStringKeyValue;
 import static com.workhub.z.servicechat.config.VoToEntity.MsgVOToModel;
@@ -22,6 +23,8 @@ public class ProcessPrivateMsg extends AbstractMsgProcessor {
 
     @Autowired
     protected ZzPrivateMsgService privateMsgService;
+    @Autowired
+    ZzUserOnlineServiceImpl zzUserOnlineService;
 
     public MsgSendStatusVo sendMsg(String msg, String ip) throws Exception {
         MsgSendStatusVo msgSendStatusVo = new MsgSendStatusVo();
@@ -52,18 +55,70 @@ public class ProcessPrivateMsg extends AbstractMsgProcessor {
                     msgSendStatusVo.setContent("消息不能发送，超过最大字数限制300");
                     return msgSendStatusVo;
                 }
-                saveMsg(privateMsg);
-                //存储消息信息（新）
-                String msgId = super.saveMessageInfo("USER", ip, msg);
+                String msgId = "";
+                String msgReceiver = privateMsg.getMsgReceiver();
+
+                List<String> onlineServerList = OnLineServerConfig.getOnlineServerList();
+                //接收人是否在线客服消息
+                boolean isOnlineServerMsg = false;
+                //发送人在线客服
+                boolean isOnlineServerSender = false;
+
+                String toId = Common.nulToEmptyString(Common.getJsonStringKeyValue(message, "toId"));
+                String fromId = Common.nulToEmptyString(Common.getJsonStringKeyValue(message, "fromId"));
+
+                if(MessageType.ONLINE_SERCVER_ID.equals(toId)){//如果是发给在线客服
+                    isOnlineServerMsg = true;//在线客服消息
+                }
+                if(onlineServerList.contains(fromId)){
+                    isOnlineServerSender = true;//客服解答消息
+                }
+
+                if(isOnlineServerMsg&&isOnlineServerSender){
+                    msgSendStatusVo.setStatus(false);
+                    msgSendStatusVo.setContent("在线客服之间不能发送消息");
+                    return msgSendStatusVo;
+                }
+
+                if(isOnlineServerMsg){//如果是发给在线客服，不存消息
+                    //在线客服消息id都是999999
+                    msgId = MessageType.ONLINE_MSG_ID;
+
+                    List<String> chooseServerList = new ArrayList<>();//可选的在线客服
+                    for(String serverId:onlineServerList){
+                        if(zzUserOnlineService.isUserOnline(serverId)){
+                            chooseServerList.add(serverId);
+                        }
+                    }
+                    if(chooseServerList.size()==0){
+                        msgSendStatusVo.setStatus(false);
+                        msgSendStatusVo.setContent("在线客服不在线，无法发送");
+                        return msgSendStatusVo;
+                    }else {
+                        int randInt = Common.getIntRandom(0,chooseServerList.size()-1);
+                        msgReceiver = chooseServerList.get(randInt);//随机选择一个在线的客服
+                    }
+                }else if(isOnlineServerSender){//如果在线客服发送消息
+                    //在线客服消息id都是999999
+                    msgId = MessageType.ONLINE_MSG_ID;
+                }else{//聊天消息
+                    saveMsg(privateMsg);
+                    //存储消息信息（新）
+                    msgId = super.saveMessageInfo("USER", ip, msg);
+                }
                 msgSendStatusVo.setId(msgId);
                 //把前端的消息id替换成后端的id
                 String newMsg = Common.setJsonStringKeyValue(msg,"data.id",msgId);
+
+                if(isOnlineServerSender){//如果发送人是客服，替换发送人id 999999
+                    newMsg = Common.setJsonStringKeyValue(newMsg,"data.fromId",MessageType.ONLINE_SERCVER_ID);
+                }
                 SocketMsgVo msgVo = new SocketMsgVo();
                 /**消息确认id*/
                 msgVo.setId(msgId);
                 msgVo.setCode(SocketMsgTypeEnum.SINGLE_MSG);
                 msgVo.setSender(privateMsg.getMsgSender());
-                msgVo.setReceiver(privateMsg.getMsgReceiver());
+                msgVo.setReceiver(msgReceiver);
                 SocketMsgDetailVo detailVo = new SocketMsgDetailVo();
                 for(SocketMsgDetailTypeEnum senum:SocketMsgDetailTypeEnum.values()){
                     if(senum.getCode().equals(jsonObject.getString("code"))){
@@ -75,7 +130,9 @@ public class ProcessPrivateMsg extends AbstractMsgProcessor {
                 detailVo.setData(Common.getJsonStringKeyValue(newMsg,"data"));
                 msgVo.setMsg(detailVo);
                 /**需要接收确认*/
-                msgVo.setConfirmFlg(true);
+                if(!isOnlineServerMsg && !isOnlineServerSender){//如果不是客服消息，需要接收确认
+                    msgVo.setConfirmFlg(true);
+                }
                 //todo SocketDetailMsgVo加密
                 msgSendStatusVo.setMsg(msgVo);
                 //todo 发消息后期改成前端连接信息中心

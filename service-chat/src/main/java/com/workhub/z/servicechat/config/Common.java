@@ -892,4 +892,13 @@ public class Common {
         }
         return true;
     }
+    /**
+     * 获取int随机收
+     * @return
+     */
+    public static  int getIntRandom(int min,int max){
+        Random rand = new Random();
+        int res = rand.nextInt(max+1)+min;
+        return res;
+    }
 }

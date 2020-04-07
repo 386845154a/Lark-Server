@@ -177,4 +177,9 @@ public class MessageType {
     /**信息中心详细编码，默认**/
     public static final String SOCKET_DETAIL_DEFAULT = "999999";
 
+    /***在线客服收信人id*/
+    public static final String ONLINE_SERCVER_ID = "999999";
+    /***在线客服信息id*/
+    public static final String ONLINE_MSG_ID = "999999";
+
 }

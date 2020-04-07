@@ -17,6 +17,7 @@ import com.workhub.z.servicechat.entity.group.ZzGroupStatus;
 import com.workhub.z.servicechat.entity.group.ZzUserGroup;
 import com.workhub.z.servicechat.model.GroupEditDto;
 import com.workhub.z.servicechat.model.GroupEditUserList;
+import com.workhub.z.servicechat.model.GroupTaskDto;
 import com.workhub.z.servicechat.model.UserListDto;
 import com.workhub.z.servicechat.rabbitMq.RabbitMqMsgProducer;
 import com.workhub.z.servicechat.redis.RedisListUtil;
@@ -38,8 +39,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.workhub.z.servicechat.config.Common.putEntityNullToEmptyString;
-import static com.workhub.z.servicechat.config.MessageType.HIGH_SECRECT_LEVEL;
-import static com.workhub.z.servicechat.config.MessageType.NORMAL_SECRECT_LEVEL;
+import static com.workhub.z.servicechat.config.MessageType.*;
 import static com.workhub.z.servicechat.config.RandomId.getUUID;
 
 /**
@@ -116,6 +116,50 @@ public class ZzGroupServiceImpl implements ZzGroupService {
     @Transactional
     public Integer update(ZzGroup zzGroup) {
         int update = this.zzGroupDao.update(zzGroup);
+       //通知前端更新
+        SocketMsgVo socketMsgVo =  new SocketMsgVo();
+        socketMsgVo.setCode(SocketMsgTypeEnum.TEAM_MSG);
+        socketMsgVo.setReceiver(zzGroup.getGroupId());
+
+        SocketMsgDetailVo addVo = new SocketMsgDetailVo();
+        addVo.setCode(SocketMsgDetailTypeEnum.GROUP_EDIT);//消息类型群编辑
+        GroupTaskDto addDto = new GroupTaskDto();
+        addDto.setType(GROUP_JOIN_MSG);//群编辑类型：加入群
+        addDto.setGroupId(zzGroup.getGroupId());
+        addDto.setTimestamp(new Date());
+        addDto.setReviser(zzGroup.getGroupOwnerId());//
+        List<String> userList = zzGroupDao.queryGroupUserIdListByGroupId(zzGroup.getGroupId());
+        String addUserIds = "";
+        for(int i=0;i<userList.size();i++){
+            if(i==0){
+                addUserIds = userList.get(i);
+            }else {
+                addUserIds += ","+userList.get(i);
+            }
+        }
+        List<UserListDto> addUserList = new ArrayList<>();
+        List<ChatAdminUserVo> addUserInfoList = null;
+        if(!addUserIds.equals("")) {
+            addUserInfoList = iUserService.userList(addUserIds);
+            for (ChatAdminUserVo userInfo : addUserInfoList) {
+                UserListDto userListDto = new UserListDto();
+                userListDto.setUserId(userInfo.getId());
+                userListDto.setImg(userInfo.getAvatar());
+                userListDto.setUserLevels(userInfo.getSecretLevel());
+                addUserList.add(userListDto);
+            }
+        }
+        addDto.setUserList(addUserList);
+        addDto.setZzGroup(zzGroup);
+        addVo.setData(addDto);
+        socketMsgVo.setMsg(addVo);
+        //校验消息
+        CheckSocketMsgVo cRes = Common.checkSocketMsg(socketMsgVo);
+        //只有消息合法才去绑定socket通信频道
+        if(cRes.getRes()){
+            rabbitMqMsgProducer.sendSocketTeamMsg(socketMsgVo);
+        }
+
         return update;
     }
 
