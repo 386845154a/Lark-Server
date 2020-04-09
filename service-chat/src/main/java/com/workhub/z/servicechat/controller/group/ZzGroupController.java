@@ -396,7 +396,12 @@ public class ZzGroupController  {
         objectRestResponse.msg("编辑成员成功");
         String userId= Common.nulToEmptyString(request.getHeader("userId"));
         String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
-
+        //邀请入群，本人必须在群组内
+        List<String>  memberList = zzGroupService.queryGroupUserIdListByGroupId(groupInfo.getGroupId());
+        if(!memberList.contains(userId)){
+            objectRestResponse.rel(false);
+            objectRestResponse.msg("操作失败，操作人不在群组内");
+        }
         ZzGroup zzGroupNow = zzGroupService.queryById(groupInfo.getGroupId());
         String groupOwner = zzGroupNow.getGroupOwnerId();
         List<GroupEditUserList> userListDtos = groupInfo.getUserList();

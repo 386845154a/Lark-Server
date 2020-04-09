@@ -183,6 +183,12 @@ public class ZzMeetingUserController {
         String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
         String userNo = Common.nulToEmptyString(request.getHeader("dnname"));
         String userIp = Common.nulToEmptyString(request.getHeader("userHost"));
+        //只有会议人员可以邀请其他人员
+        List<String> memberList = zzMeetingUserService.getMeetingByUserId(meetingVo.getId());
+        if(!memberList.contains(operateId)){
+            res.rel(false);
+            res.data("操作失败，操作人不在会议内");
+        }
         try {
             int i = this.zzMeetingUserService.editMeetUser(meetingVo,operateId,userName,userNo,userIp);
             if(i!=1){

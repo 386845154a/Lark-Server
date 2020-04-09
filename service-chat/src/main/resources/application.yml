@@ -114,3 +114,5 @@ self-log-path: C:/lark_log
 require_approve_authority_job_cron: 0 */5 * * * ?
 #重启服务清除缓存，以免造成缓存脏数据，如果是单机部署设置成true，如果是集群部署，且只是单台服务器故障，设置成false
 restartServiceClearCache: true
+#在线客服人员id
+online-server-id: 999999

@@ -67,7 +67,7 @@ public class ProcessPrivateMsg extends AbstractMsgProcessor {
                 String toId = Common.nulToEmptyString(Common.getJsonStringKeyValue(message, "toId"));
                 String fromId = Common.nulToEmptyString(Common.getJsonStringKeyValue(message, "fromId"));
 
-                if(MessageType.ONLINE_SERCVER_ID.equals(toId)){//如果是发给在线客服
+                if(OnLineServerConfig.getOnlineServerId().equals(toId)){//如果是发给在线客服
                     isOnlineServerMsg = true;//在线客服消息
                 }
                 if(onlineServerList.contains(fromId)){
@@ -111,7 +111,7 @@ public class ProcessPrivateMsg extends AbstractMsgProcessor {
                 String newMsg = Common.setJsonStringKeyValue(msg,"data.id",msgId);
 
                 if(isOnlineServerSender){//如果发送人是客服，替换发送人id 999999
-                    newMsg = Common.setJsonStringKeyValue(newMsg,"data.fromId",MessageType.ONLINE_SERCVER_ID);
+                    newMsg = Common.setJsonStringKeyValue(newMsg,"data.fromId",OnLineServerConfig.getOnlineServerId());
                 }
                 SocketMsgVo msgVo = new SocketMsgVo();
                 /**消息确认id*/
