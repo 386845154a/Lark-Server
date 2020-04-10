@@ -20,13 +20,18 @@ import com.github.hollykunge.security.common.util.ClientUtil;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
@@ -85,6 +90,10 @@ public class AdminAccessFilter extends ZuulFilter {
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletRequest request = ctx.getRequest();
         final String requestUri = request.getRequestURI().substring(zuulPrefix.length());
+
+        if(requestUri==null){
+            throw new ClientInvalidException("Invalid customer request");
+        }
         BaseContextHandler.setToken(null);
 
         String dnname = request.getHeader(CommonConstants.PERSON_ID_ARG);
@@ -94,6 +103,26 @@ public class AdminAccessFilter extends ZuulFilter {
         //将院网关ip携带给云雀服务，供其他服务使用
         if (!StringUtils.isEmpty(clientIp)) {
             ctx.addZuulRequestHeader(CommonConstants.CLIENT_IP_ARG, clientIp);
+        }
+        String body = null;
+        if (!ctx.isChunkedRequestBody()&&StringUtils.equals(requestUri,CommonConstants.AUTH_JWT_TOKEN)) {
+            try {
+                ServletInputStream inp = ctx.getRequest().getInputStream();
+                if (inp != null) {
+                    body = IOUtils.toString(inp);
+                    if(!StringUtils.isEmpty(body)) {
+                        JSONObject jsonObject = new JSONObject(body);
+                        String username = jsonObject.get("username").toString();
+                        if(!StringUtils.isEmpty(username)&&
+                                Objects.equals(username,sysAuthConfig.getSysUsername())){
+                            ctx.addZuulRequestHeader(CommonConstants.PERSON_ID_ARG,"");
+                            return authorization(requestUri,ctx,request);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                throw new ClientInvalidException("身份信息编码转化错误...");
+            }
         }
         //正常用户名密码登录
         if (StringUtils.isEmpty(dnname)) {
@@ -238,7 +267,7 @@ public class AdminAccessFilter extends ZuulFilter {
      */
     private void checkUserPermission(String requestUri, List<FrontPermission> permissionInfos, RequestContext ctx, IJWTInfo user) {
         if (StringUtils.isEmpty(requestUri)) {
-            throw new ClientInvalidException("requestUri 参数异常...");
+            throw new ClientInvalidException("requestUri Parameter exception...");
         }
         permissionInfos = permissionInfos.stream()
                 .filter(new Predicate<FrontPermission>() {
