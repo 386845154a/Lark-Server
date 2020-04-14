@@ -6,13 +6,18 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.workhub.z.servicechat.VO.*;
 import com.workhub.z.servicechat.config.Common;
+import com.workhub.z.servicechat.config.MessageType;
+import com.workhub.z.servicechat.config.SocketMsgDetailTypeEnum;
+import com.workhub.z.servicechat.config.SocketMsgTypeEnum;
 import com.workhub.z.servicechat.dao.ZzMessageInfoDao;
 import com.workhub.z.servicechat.entity.message.ZzMessageInfo;
 import com.workhub.z.servicechat.model.ContactsMessageDto;
 import com.workhub.z.servicechat.model.RawMessageDto;
+import com.workhub.z.servicechat.rabbitMq.RabbitMqMsgProducer;
 import com.workhub.z.servicechat.service.ZzMessageInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -32,8 +37,10 @@ import static com.workhub.z.servicechat.config.Common.putEntityNullToEmptyString
 @Service("zzMessageInfoService")
 public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
     private static Logger log = LoggerFactory.getLogger(ZzMessageInfoServiceImpl.class);
-    @Resource
+    @Autowired
     private ZzMessageInfoDao zzMessageInfoDao;
+    @Autowired
+    private RabbitMqMsgProducer rabbitMqMsgProducer;
     /**
      * 新增数据
      *
@@ -676,5 +683,52 @@ public class ZzMessageInfoServiceImpl implements ZzMessageInfoService {
         String messageContent = Common.nulToEmptyString(rawDto.getMsg());
         vo.setMessageContent(messageContent);
         return  vo;
+    }
+
+    /**
+     * 消息撤销
+     * @param msgId
+     * @param receiver
+     * @param type
+     * @return
+     */
+    public int msgCancel(String msgId,String receiver,String type,String user){
+        ZzMessageInfo zzMessageInfo = this.zzMessageInfoDao.queryById(msgId);
+        if(zzMessageInfo==null || zzMessageInfo.getMsgId()==null){
+            return 0;
+        }
+        //必须发送人自己撤销
+        if(!zzMessageInfo.getSender().equals(user)){
+            return 0;
+        }
+
+        ZzMessageInfo zzMessageInfo0 = new ZzMessageInfo();
+        zzMessageInfo0.setMsgId(msgId);
+        zzMessageInfo0.setCancel("1");
+        int i = this.zzMessageInfoDao.update(zzMessageInfo0);
+
+        SocketMsgVo socketMsgVo = new SocketMsgVo();
+        socketMsgVo.setReceiver(receiver);
+        socketMsgVo.setSender(user);
+        SocketMsgDetailVo detailVo = new SocketMsgDetailVo();
+        detailVo.setCode(SocketMsgDetailTypeEnum.MSG_DELTET);
+        MsgCancelVo cancelVo = new MsgCancelVo();
+        cancelVo.setMsgId(msgId);
+        cancelVo.setReceiver(receiver);
+        cancelVo.setType(type);
+        cancelVo.setCancelUser(user);
+        detailVo.setData(cancelVo);
+        socketMsgVo.setMsg(detailVo);
+        //私聊撤销
+        if(type.equals(MessageType.MESSAGE_CANCEL_TYPE_PRIVATE)){
+            socketMsgVo.setCode(SocketMsgTypeEnum.SINGLE_MSG);
+            rabbitMqMsgProducer.sendSocketPrivateMsg(socketMsgVo);
+        }else  if(type.equals(MessageType.MESSAGE_CANCEL_TYPE_GROUP) || type.equals(MessageType.MESSAGE_CANCEL_TYPE_MEET)){//会议或者群
+            socketMsgVo.setCode(SocketMsgTypeEnum.TEAM_MSG);
+            rabbitMqMsgProducer.sendSocketTeamMsg(socketMsgVo);
+        }
+
+
+        return  i;
     }
 }

@@ -9,10 +9,7 @@ import com.workhub.z.servicechat.service.ZzMessageInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -120,6 +117,27 @@ public class ZzMessageInfoController {
         res.rel(true);
         res.msg("200");
 
+        return res;
+    }
+
+    /**
+     * 消息撤销
+     * @param msg msgId 消息id；receiver 接收人；type：类型0私聊1群2会议
+     * @return
+     */
+    @PutMapping("msgCancel")
+    public ObjectRestResponse msgCancel(@RequestBody Map msg){
+        ObjectRestResponse res = new ObjectRestResponse();
+        res.rel(true);
+        res.msg("200");
+        String userId = Common.nulToEmptyString(request.getHeader("userId"));
+      int i = this.zzMessageInfoService.msgCancel(Common.nulToEmptyString(msg.get("msgId")),Common.nulToEmptyString(msg.get("receiver")),Common.nulToEmptyString(msg.get("type")),userId);
+      if(i==0){
+          res.rel(false);
+          res.msg("500");
+          res.data("消息不存在或者当前用户不是发送人");
+          return res;
+      }
         return res;
     }
 

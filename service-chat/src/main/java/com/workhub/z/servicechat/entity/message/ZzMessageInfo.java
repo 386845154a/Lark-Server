@@ -40,4 +40,6 @@ public class ZzMessageInfo implements Serializable {
     private String fileId;
     /**前端消息id*/
     private String frontId;
+    /**撤销*/
+    private String cancel;
 }

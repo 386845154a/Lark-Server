@@ -63,4 +63,13 @@ public interface ZzMessageInfoService {
 
     String queryMessageList2(String type,String receiver,String userId);
     String queryMessageList(String type,String receiver,String userId);
+
+    /**
+     * 消息撤销
+     * @param msgId
+     * @param receiver
+     * @param type
+     * @return
+     */
+    int msgCancel(String msgId,String receiver,String type,String user);
 }

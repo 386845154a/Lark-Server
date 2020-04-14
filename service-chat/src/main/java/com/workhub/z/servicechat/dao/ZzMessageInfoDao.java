@@ -38,6 +38,12 @@ public interface ZzMessageInfoDao {
      * @return 影响行数
      */
     int deleteById(String msgId);
+    /**
+     * 通过主键查询数据
+     *
+     * @param msgId 主键
+     */
+    ZzMessageInfo queryById(String msgId);
 
     List<ContactsMessageDto> queryContactsMessage2(@Param("userId")String userId);
     List<RawMessageDto> queryContactsMessage(@Param("userId")String userId);

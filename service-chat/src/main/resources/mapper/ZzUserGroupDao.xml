@@ -170,6 +170,7 @@
                                          zz_contact_inf  receiver,
                                          zz_group_file   f
                                    WHERE t.type = 'USER'
+                                     and t.cancel = '0'
                                      and t.sender = sender.id
                                      and t.receiver = receiver.id
                                      and t.file_id = f.file_id(+)
@@ -197,6 +198,7 @@
                                 zz_contact_inf  receiver,
                                 zz_group_file   f
                           where t.type = 'GROUP'
+                            and t.cancel = '0'
                             and t.sender = sender.id
                             and t.receiver = receiver.id
                             and t.file_id = f.file_id(+)

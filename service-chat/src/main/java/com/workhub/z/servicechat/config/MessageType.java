@@ -179,4 +179,9 @@ public class MessageType {
     /***在线客服信息id*/
     public static final String ONLINE_MSG_ID = "999999";
 
+    /**消息撤销 类型**/
+    public static final String MESSAGE_CANCEL_TYPE_PRIVATE = "0";//私聊
+    public static final String MESSAGE_CANCEL_TYPE_GROUP = "1";//群聊
+    public static final String MESSAGE_CANCEL_TYPE_MEET = "2";//会议
+
 }
