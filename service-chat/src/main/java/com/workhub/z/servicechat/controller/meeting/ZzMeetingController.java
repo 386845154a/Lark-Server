@@ -5,6 +5,7 @@ import com.github.hollykunge.security.common.msg.ListRestResponse;
 import com.github.hollykunge.security.common.msg.ObjectRestResponse;
 import com.workhub.z.servicechat.VO.MeetingVo;
 import com.workhub.z.servicechat.config.Common;
+import com.workhub.z.servicechat.config.GateRequestHeaderParamConfig;
 import com.workhub.z.servicechat.config.RandomId;
 import com.workhub.z.servicechat.entity.meeting.ZzMeeting;
 import com.workhub.z.servicechat.service.AdminUserService;
@@ -35,6 +36,11 @@ public class ZzMeetingController {
     private HttpServletRequest request;
     @Resource
     private AdminUserService iUserService;
+    //gate请求属性
+    static String pidInHeaderRequest = GateRequestHeaderParamConfig.getPid();
+    static String clientIpInHeaderRequest = GateRequestHeaderParamConfig.getClientIp();
+    static String userIdInHeaderRequest = GateRequestHeaderParamConfig.getUserId();
+    static String userNameInHeaderRequest = GateRequestHeaderParamConfig.getUserName();
 /**
 * @MethodName: add
  * @Description: 新增会议
@@ -48,9 +54,9 @@ public class ZzMeetingController {
         ObjectRestResponse res = new ObjectRestResponse();
         res.rel(true);
         res.msg("200");
-        String userId= Common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
-        String userIp = Common.nulToEmptyString(request.getHeader("userHost"));
+        String userId= Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader(userNameInHeaderRequest)),"UTF-8");
+        String userIp = Common.nulToEmptyString(request.getHeader(clientIpInHeaderRequest));
         try {
             zzMeeting.setCrtUser(userId);
             zzMeeting.setCrtName(userName);
@@ -103,10 +109,10 @@ public class ZzMeetingController {
         res.rel(true);
         res.msg("200");
         res.data("操作成功");
-        String userId = Common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
-        String userNo = Common.nulToEmptyString(request.getHeader("dnname"));
-        String userIp = Common.nulToEmptyString(request.getHeader("userHost"));
+        String userId = Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader(userNameInHeaderRequest)),"UTF-8");
+        String userNo = Common.nulToEmptyString(request.getHeader(pidInHeaderRequest));
+        String userIp = Common.nulToEmptyString(request.getHeader(clientIpInHeaderRequest));
         try {
             zzMeeting.setUpdHost(userIp);
             zzMeeting.setUpdName(userName);
@@ -145,10 +151,10 @@ public class ZzMeetingController {
     @PostMapping("createMeeting")
     public ObjectRestResponse createMeeting(@RequestBody String meetingJson) throws Exception{
 
-        String userId= Common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
-        String userIp = Common.nulToEmptyString(request.getHeader("userHost"));
-        String userNo= Common.nulToEmptyString(request.getHeader("dnname"));
+        String userId= Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader(userNameInHeaderRequest)),"UTF-8");
+        String userIp = Common.nulToEmptyString(request.getHeader(clientIpInHeaderRequest));
+        String userNo= Common.nulToEmptyString(request.getHeader(pidInHeaderRequest));
         //会议id
         String groupId = RandomId.getUUID();
         JSONObject jsonObject = JSONObject.parseObject(meetingJson);
@@ -211,10 +217,10 @@ public class ZzMeetingController {
     */
     @PutMapping("changeMeetAgenda")
     public ObjectRestResponse changeMeetAgenda(@RequestBody Map params) throws UnsupportedEncodingException {
-        params.put("userId", Common.nulToEmptyString(request.getHeader("userId")));
-        params.put("userName",URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8"));
-        params.put("userNo", Common.nulToEmptyString(request.getHeader("dnname")));
-        params.put("userIp", Common.nulToEmptyString(request.getHeader("userHost")));
+        params.put("userId", Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest)));
+        params.put("userName",URLDecoder.decode(Common.nulToEmptyString(request.getHeader(userNameInHeaderRequest)),"UTF-8"));
+        params.put("userNo", Common.nulToEmptyString(request.getHeader(pidInHeaderRequest)));
+        params.put("userIp", Common.nulToEmptyString(request.getHeader(clientIpInHeaderRequest)));
         ObjectRestResponse objectRestResponse = this.zzMeetingService.changeMeetAgenda(params);
         return objectRestResponse;
     }
@@ -232,9 +238,9 @@ public class ZzMeetingController {
         objectRestResponse.setRel(true);
         objectRestResponse.setMessage("200");
         objectRestResponse.setResult("操作成功");
-        zzMeeting.setUpdUser(Common.nulToEmptyString(request.getHeader("userId")));
-        zzMeeting.setUpdName(URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8"));
-        zzMeeting.setUpdHost(Common.nulToEmptyString(request.getHeader("userHost")));
+        zzMeeting.setUpdUser(Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest)));
+        zzMeeting.setUpdName(URLDecoder.decode(Common.nulToEmptyString(request.getHeader(userNameInHeaderRequest)),"UTF-8"));
+        zzMeeting.setUpdHost(Common.nulToEmptyString(request.getHeader(clientIpInHeaderRequest)));
         try {
             int i= this.zzMeetingService.changeMeetAgendaList(zzMeeting);
         } catch (Exception e) {

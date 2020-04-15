@@ -3,6 +3,7 @@ package com.workhub.z.servicechat.controller.config;
 import com.github.hollykunge.security.common.msg.ObjectRestResponse;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
 import com.workhub.z.servicechat.config.Common;
+import com.workhub.z.servicechat.config.GateRequestHeaderParamConfig;
 import com.workhub.z.servicechat.config.RandomId;
 import com.workhub.z.servicechat.entity.config.ZzDictionaryWords;
 import com.workhub.z.servicechat.service.ZzDictionaryWordsService;
@@ -35,7 +36,11 @@ public class ZzDictionaryWordsController{
     private ZzDictionaryWordsService zzDictionaryWordsService;
     @Autowired
     private HttpServletRequest request;
-
+    //gate请求属性
+    static String pidInHeaderRequest = GateRequestHeaderParamConfig.getPid();
+    static String clientIpInHeaderRequest = GateRequestHeaderParamConfig.getClientIp();
+    static String userIdInHeaderRequest = GateRequestHeaderParamConfig.getUserId();
+    static String userNameInHeaderRequest = GateRequestHeaderParamConfig.getUserName();
     /**
      * 通过主键查询单条数据
      *
@@ -91,7 +96,7 @@ public class ZzDictionaryWordsController{
         zzDictionaryWords.setWordCode(Common.nulToEmptyString(params.get("wordCode")));
         zzDictionaryWords.setWordType(Common.nulToEmptyString(params.get("wordType")));
         zzDictionaryWords.setReplaceWord(Common.nulToEmptyString(params.get("replaceWord")));
-        String userID = request.getHeader("userId");
+        String userID = request.getHeader(userIdInHeaderRequest);
         zzDictionaryWords.setId(RandomId.getUUID());
         zzDictionaryWords.setCreateTime(new Date());
         zzDictionaryWords.setCreateUser(userID);
@@ -126,7 +131,7 @@ public class ZzDictionaryWordsController{
     public ObjectRestResponse update(@RequestParam Map<String, Object> params){
         ZzDictionaryWords zzDictionaryWords = new ZzDictionaryWords();
         zzDictionaryWords.setUpdateTime(new Date());
-        String userID = request.getHeader("userId");
+        String userID = request.getHeader(userIdInHeaderRequest);
         zzDictionaryWords.setUpdateUser(userID);
         zzDictionaryWords.setWordName(Common.nulToEmptyString(params.get("wordName")));
         zzDictionaryWords.setWordCode(Common.nulToEmptyString(params.get("wordCode")));
@@ -165,7 +170,7 @@ public class ZzDictionaryWordsController{
     public ObjectRestResponse stopUse(@RequestParam Map<String, Object> params) throws Exception{
         String id = Common.nulToEmptyString(params.get("id"));
         String flg = Common.nulToEmptyString(params.get("isUse"));
-        String userID = request.getHeader("userId");
+        String userID = request.getHeader(userIdInHeaderRequest);
         this.zzDictionaryWordsService.stopUse(id,flg,userID);
         ObjectRestResponse objectRestResponse = new ObjectRestResponse();
         objectRestResponse.msg("200");
@@ -202,7 +207,7 @@ public class ZzDictionaryWordsController{
     @ResponseBody
     //导入敏感词汇
     public ObjectRestResponse importDictionaryWords(@RequestParam("file") MultipartFile file) {
-        String userID = request.getHeader("userId");
+        String userID = request.getHeader(userIdInHeaderRequest);
         if(userID==null){
             userID="";
         }

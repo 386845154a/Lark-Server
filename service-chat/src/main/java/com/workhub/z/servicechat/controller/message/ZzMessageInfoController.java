@@ -4,6 +4,7 @@ import com.github.hollykunge.security.common.msg.ObjectRestResponse;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
 import com.workhub.z.servicechat.VO.MsgSendStatusVo;
 import com.workhub.z.servicechat.config.Common;
+import com.workhub.z.servicechat.config.GateRequestHeaderParamConfig;
 import com.workhub.z.servicechat.processor.ProcessMsg;
 import com.workhub.z.servicechat.service.ZzMessageInfoService;
 import org.slf4j.Logger;
@@ -34,6 +35,11 @@ public class ZzMessageInfoController {
     protected ProcessMsg processMsg;
     @Autowired
     protected HttpServletRequest request;
+    //gate请求属性
+    static String pidInHeaderRequest = GateRequestHeaderParamConfig.getPid();
+    static String clientIpInHeaderRequest = GateRequestHeaderParamConfig.getClientIp();
+    static String userIdInHeaderRequest = GateRequestHeaderParamConfig.getUserId();
+    static String userNameInHeaderRequest = GateRequestHeaderParamConfig.getUserName();
     /**
      * 消息监控 私聊(改为提供接口，使用admin服务调用)
      *
@@ -89,8 +95,8 @@ public class ZzMessageInfoController {
             res.rel(true);
             res.msg("200");
 
-            String userIp = Common.nulToEmptyString(request.getHeader("userHost"));
-            String userId = Common.nulToEmptyString(request.getHeader("userId"));
+            String userIp = Common.nulToEmptyString(request.getHeader(clientIpInHeaderRequest));
+            String userId = Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
             try {
                 MsgSendStatusVo msgSendStatusVo = processMsg.process(userId,messageInf,userIp);
                 res.data(msgSendStatusVo) ;
@@ -130,7 +136,7 @@ public class ZzMessageInfoController {
         ObjectRestResponse res = new ObjectRestResponse();
         res.rel(true);
         res.msg("200");
-        String userId = Common.nulToEmptyString(request.getHeader("userId"));
+        String userId = Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
       int i = this.zzMessageInfoService.msgCancel(Common.nulToEmptyString(msg.get("msgId")),Common.nulToEmptyString(msg.get("receiver")),Common.nulToEmptyString(msg.get("type")),userId);
       if(i==0){
           res.rel(false);

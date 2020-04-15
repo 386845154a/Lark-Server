@@ -6,6 +6,7 @@ import com.github.hollykunge.security.common.msg.ObjectRestResponse;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
 import com.workhub.z.servicechat.VO.ChatAdminUserVo;
 import com.workhub.z.servicechat.config.Common;
+import com.workhub.z.servicechat.config.GateRequestHeaderParamConfig;
 import com.workhub.z.servicechat.config.MessageType;
 import com.workhub.z.servicechat.config.RandomId;
 import com.workhub.z.servicechat.entity.group.ZzGroupApprove;
@@ -46,6 +47,11 @@ public class ZzGroupApproveController {
     ZzRequireApproveAuthorityService zzRequireApproveAuthorityService;
     @Resource
     AdminUserService iUserService;
+    //gate请求属性
+    static String pidInHeaderRequest = GateRequestHeaderParamConfig.getPid();
+    static String clientIpInHeaderRequest = GateRequestHeaderParamConfig.getClientIp();
+    static String userIdInHeaderRequest = GateRequestHeaderParamConfig.getUserId();
+    static String userNameInHeaderRequest = GateRequestHeaderParamConfig.getUserName();
     /**
      * todo:使用
     * @MethodName: add
@@ -59,12 +65,12 @@ public class ZzGroupApproveController {
    @PostMapping("/add")
    public ObjectRestResponse add(@RequestBody String msg) throws Exception{
        //log.info("======================="+msg.length()+"");
-       String userId = Common.nulToEmptyString(request.getHeader("userId"));
+       String userId = Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
        //userId= "123123123123";
-       String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+       String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader(userNameInHeaderRequest)),"UTF-8");
        //userName="测试";
-       String userIp = Common.nulToEmptyString(request.getHeader("userHost"));
-       String userNo= Common.nulToEmptyString(request.getHeader("dnname"));
+       String userIp = Common.nulToEmptyString(request.getHeader(clientIpInHeaderRequest));
+       String userNo= Common.nulToEmptyString(request.getHeader(pidInHeaderRequest));
        ObjectRestResponse objectRestResponse = new ObjectRestResponse();
        objectRestResponse.rel(true);
        objectRestResponse.msg("200");
@@ -246,13 +252,13 @@ public class ZzGroupApproveController {
    **/
     @PutMapping("/approve")
     public ObjectRestResponse approve(@RequestParam Map param) throws Exception{
-        String userId = Common.nulToEmptyString(request.getHeader("userId"));
+        String userId = Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
         param.put("userId",userId);
         //param.put("userId","yanzhenqing");
-        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader(userNameInHeaderRequest)),"UTF-8");
         param.put("userName",userName);
         //param.put("userName","严振卿");
-        String ip = Common.nulToEmptyString(request.getHeader("userHost"));
+        String ip = Common.nulToEmptyString(request.getHeader(clientIpInHeaderRequest));
         param.put("ip",ip);
         ObjectRestResponse objectRestResponse = new ObjectRestResponse();
         objectRestResponse.rel(true);
@@ -331,7 +337,7 @@ public class ZzGroupApproveController {
         if(approveFlg.equals("")){
             param.put("approveFlg","0");
         }
-        String userId = Common.nulToEmptyString(request.getHeader("userId"));
+        String userId = Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
         param.put("userId",userId);
         //param.put("userId","7803632385204eb6ab88265c04dba81f");
         try {
@@ -368,8 +374,8 @@ public class ZzGroupApproveController {
      **/
     @GetMapping("/getApplyGroupList")
     public TableResultResponse getApplyGroupList(@RequestParam Map param) throws Exception{
-        String userId = Common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String userId = Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader(userNameInHeaderRequest)),"UTF-8");
 
         String approveFlg = Common.nulToEmptyString(param.get("approveFlg"));
         if(approveFlg.equals("")){

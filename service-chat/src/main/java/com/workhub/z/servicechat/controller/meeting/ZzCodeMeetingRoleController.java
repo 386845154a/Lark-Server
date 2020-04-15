@@ -3,6 +3,7 @@ package com.workhub.z.servicechat.controller.meeting;
 import com.github.hollykunge.security.common.msg.ObjectRestResponse;
 import com.github.hollykunge.security.common.msg.TableResultResponse;
 import com.workhub.z.servicechat.config.Common;
+import com.workhub.z.servicechat.config.GateRequestHeaderParamConfig;
 import com.workhub.z.servicechat.entity.meeting.ZzCodeMeetingRole;
 import com.workhub.z.servicechat.service.ZzCodeMeetingRoleService;
 import org.slf4j.Logger;
@@ -27,6 +28,11 @@ public class ZzCodeMeetingRoleController {
     private ZzCodeMeetingRoleService zzCodeMeetingRoleService;
     @Resource
     private HttpServletRequest request;
+    //gate请求属性
+    static String pidInHeaderRequest = GateRequestHeaderParamConfig.getPid();
+    static String clientIpInHeaderRequest = GateRequestHeaderParamConfig.getClientIp();
+    static String userIdInHeaderRequest = GateRequestHeaderParamConfig.getUserId();
+    static String userNameInHeaderRequest = GateRequestHeaderParamConfig.getUserName();
     /**
      * @MethodName: add
      * @Description: 新增
@@ -40,9 +46,9 @@ public class ZzCodeMeetingRoleController {
         ObjectRestResponse res = new ObjectRestResponse();
         res.rel(true);
         res.msg("200");
-        String userId= Common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
-        String userIp = Common.nulToEmptyString(request.getHeader("userHost"));
+        String userId= Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader(userNameInHeaderRequest)),"UTF-8");
+        String userIp = Common.nulToEmptyString(request.getHeader(clientIpInHeaderRequest));
         try {
             zzCodeMeetingRole.setCrtUser(userId);
             zzCodeMeetingRole.setCrtName(userName);
@@ -75,10 +81,10 @@ public class ZzCodeMeetingRoleController {
         res.rel(true);
         res.msg("200");
         res.data("操作成功");
-        String userId = Common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
-        String userNo = Common.nulToEmptyString(request.getHeader("dnname"));
-        String userIp = Common.nulToEmptyString(request.getHeader("userHost"));
+        String userId = Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader(userNameInHeaderRequest)),"UTF-8");
+        String userNo = Common.nulToEmptyString(request.getHeader(pidInHeaderRequest));
+        String userIp = Common.nulToEmptyString(request.getHeader(clientIpInHeaderRequest));
         try {
             zzCodeMeetingRole.setUpdHost(userIp);
             zzCodeMeetingRole.setUpdName(userName);

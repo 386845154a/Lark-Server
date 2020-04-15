@@ -7,10 +7,7 @@ import com.github.hollykunge.security.common.msg.TableResultResponse;
 import com.github.hollykunge.security.common.vo.rpcvo.ContactVO;
 import com.github.pagehelper.PageInfo;
 import com.workhub.z.servicechat.VO.*;
-import com.workhub.z.servicechat.config.CacheConst;
-import com.workhub.z.servicechat.config.Common;
-import com.workhub.z.servicechat.config.MessageType;
-import com.workhub.z.servicechat.config.RandomId;
+import com.workhub.z.servicechat.config.*;
 import com.workhub.z.servicechat.entity.group.ZzGroup;
 import com.workhub.z.servicechat.model.GroupEditDto;
 import com.workhub.z.servicechat.model.GroupEditUserList;
@@ -66,6 +63,11 @@ public class ZzGroupController  {
      * 失败
      */
     private static final String FAIL = "-1";
+    //gate请求属性
+    static String pidInHeaderRequest = GateRequestHeaderParamConfig.getPid();
+    static String clientIpInHeaderRequest = GateRequestHeaderParamConfig.getClientIp();
+    static String userIdInHeaderRequest = GateRequestHeaderParamConfig.getUserId();
+    static String userNameInHeaderRequest = GateRequestHeaderParamConfig.getUserName();
     /**
      * 通过主键查询单条数据
      *
@@ -89,8 +91,8 @@ public class ZzGroupController  {
     public ObjectRestResponse insert(@RequestBody ZzGroup zzGroup,@RequestParam("token")String token) throws Exception{
         zzGroup.setGroupId(RandomId.getUUID());
         zzGroup.setCreateTime(new Date());
-        String userId= Common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String userId= Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader(userNameInHeaderRequest)),"UTF-8");
         try {
             Common.putEntityNullToEmptyString(zzGroup);
             if(zzGroup!=null && zzGroup.getIscross().equals("")){
@@ -119,7 +121,7 @@ public class ZzGroupController  {
 
     @PostMapping("/update")
     public ObjectRestResponse update(@RequestBody ZzGroup zzGroup){
-        String userId = Common.nulToEmptyString(request.getHeader("userId"));
+        String userId = Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
         try {
             Common.putEntityNullToEmptyString(zzGroup);
             zzGroup.setCreateTime(null);
@@ -230,7 +232,7 @@ public class ZzGroupController  {
      **/
     @GetMapping("/queryMessageList2")
     public ListRestResponse queryMessageList2(@RequestParam("type")String type,@RequestParam("receiver")String receiver) throws Exception {
-        String userId= Common.nulToEmptyString(request.getHeader("userId"));
+        String userId= Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
         String res =  messageInfoService.queryMessageList2(type,receiver,userId);
         JSONArray myJsonArray = JSONArray.parseArray(res);
         return new ListRestResponse("200", 0,myJsonArray);
@@ -245,7 +247,7 @@ public class ZzGroupController  {
     **/
     @GetMapping("/queryMessageList")
     public ListRestResponse queryMessageList(@RequestParam("type")String type,@RequestParam("receiver")String receiver) throws Exception {
-        String userId= Common.nulToEmptyString(request.getHeader("userId"));
+        String userId= Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
         String res =  messageInfoService.queryMessageList(type,receiver,userId);
         JSONArray myJsonArray = JSONArray.parseArray(res);
         return new ListRestResponse("200", myJsonArray.size(),myJsonArray);
@@ -362,8 +364,8 @@ public class ZzGroupController  {
      */
     @GetMapping("dissolve")
     public ObjectRestResponse dissolve(@RequestParam("groupId") String groupId,ChannelContext channelContext) throws Exception{
-        String userId= Common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String userId= Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader(userNameInHeaderRequest)),"UTF-8");
         zzGroupService.dissolveGroup(groupId,userId,userName);
         return new ObjectRestResponse().rel(true).msg("研讨组已解散...");
     }
@@ -394,8 +396,8 @@ public class ZzGroupController  {
         ObjectRestResponse objectRestResponse = new ObjectRestResponse();
         objectRestResponse.rel(true);
         objectRestResponse.msg("编辑成员成功");
-        String userId= Common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String userId= Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader(userNameInHeaderRequest)),"UTF-8");
         //邀请入群，本人必须在群组内
         List<String>  memberList = zzGroupService.queryGroupUserIdListByGroupId(groupInfo.getGroupId());
         if(!memberList.contains(userId)){

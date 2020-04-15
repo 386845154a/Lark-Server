@@ -2,10 +2,7 @@ package com.workhub.z.servicechat.controller.config;
 
 import com.github.hollykunge.security.common.msg.ObjectRestResponse;
 import com.workhub.z.servicechat.VO.ChatAdminUserVo;
-import com.workhub.z.servicechat.config.Common;
-import com.workhub.z.servicechat.config.EncryptionAndDeciphering;
-import com.workhub.z.servicechat.config.MessageType;
-import com.workhub.z.servicechat.config.RandomId;
+import com.workhub.z.servicechat.config.*;
 import com.workhub.z.servicechat.entity.group.ZzGroup;
 import com.workhub.z.servicechat.entity.group.ZzGroupFile;
 import com.workhub.z.servicechat.entity.group.ZzGroupStatus;
@@ -60,6 +57,11 @@ public class ZzFileManageController {
     private ZzMeetingService zzMeetingService;
     @Resource
     private ZzRequireApproveAuthorityService zzRequireApproveAuthorityService;
+    //gate请求属性
+    static String pidInHeaderRequest = GateRequestHeaderParamConfig.getPid();
+    static String clientIpInHeaderRequest = GateRequestHeaderParamConfig.getClientIp();
+    static String userIdInHeaderRequest = GateRequestHeaderParamConfig.getUserId();
+    static String userNameInHeaderRequest = GateRequestHeaderParamConfig.getUserName();
     /*@RequestMapping("/singleFileUpload")
     @ResponseBody
     //上传
@@ -136,8 +138,8 @@ public class ZzFileManageController {
             //如果上传成功，入库记录
             if (res.equals("1")) {
                 zzGroupFile.setFileId(uplodaRes.get("file_id"));
-                String userId = Common.nulToEmptyString(request.getHeader("userId"));
-                String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+                String userId = Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
+                String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader(userNameInHeaderRequest)),"UTF-8");
                 zzGroupFile.setCreator((userId==null)?"":userId);
                 zzGroupFile.setCreatorName((userName==null)?"":userName);
                 zzGroupFile.setCreateTime(new Date());
@@ -284,8 +286,8 @@ public class ZzFileManageController {
     //下载 1成功 -1 失败 0 文件不存在,-2未审计通过，无权限下载
     public ObjectRestResponse downloadFile(@RequestParam String fileId) throws Exception{
         fileId = (fileId==null)?"":fileId;
-        String userId = Common.nulToEmptyString(request.getHeader("userId"));
-        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader("userName")),"UTF-8");
+        String userId = Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
+        String userName = URLDecoder.decode(Common.nulToEmptyString(request.getHeader(userNameInHeaderRequest)),"UTF-8");
         String des = "";
         String groupId = "";
         //1会议0群
