@@ -7,7 +7,7 @@ package com.workhub.z.servicechat.config;
  */
 public class GateRequestHeaderParamConfig {
     private  static String  pidInHeaderRequest = "pid";//身份证号
-    private  static String  clientIpInHeaderRequest = "userHost";//"clientIp";//客户端ip
+    private  static String  clientIpInHeaderRequest = "clientIp";//"clientIp","userHost";//客户端ip
     private  static String  userNameInHeaderRequest = "userName";//用户id
     private  static String  userIdInHeaderRequest = "userId";//用户名字
 

@@ -103,6 +103,7 @@
             </if>
             <if test="cancel != null and cancel != ''">
                 CANCEL = #{cancel},
+                CANCEL_TIME = sysdate,
             </if>
         </set>
         where MSG_ID = #{msgId}
