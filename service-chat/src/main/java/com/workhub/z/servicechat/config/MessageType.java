@@ -9,6 +9,12 @@ package com.workhub.z.servicechat.config;
 */
 public class MessageType {
 
+    /**
+     * 用于系统消息，每个登录用户都要加入系统消息组
+     * 系统通知
+     */
+    public static final String GROUP_SYS = "Iwork-Message";
+
     /**个人消息*/
     public static final int PRIVATE_MSG = 200100;
     //群消息
