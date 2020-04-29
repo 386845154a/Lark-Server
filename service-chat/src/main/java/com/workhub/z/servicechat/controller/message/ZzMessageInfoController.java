@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 /**
@@ -145,6 +146,24 @@ public class ZzMessageInfoController {
           return res;
       }
         return res;
+    }
+
+    /**
+     * 导出聊天
+     * @param receiver 接收人（聊天对象）
+     * @param beginDate 开始日期 yyyy-MM-dd
+     * @param endDate 开始日期 yyyy-MM-dd
+     * @param type user私聊group群meet会议
+     * @return
+     */
+    @GetMapping("exportMsg")
+    public void exportMsg(@RequestParam("receiver") String receiver,
+                                            @RequestParam(name = "beginDate",required=false) String beginDate,
+                                                @RequestParam(name = "endDate",required=false) String endDate,
+                                                    @RequestParam("type") String type,
+                                                        HttpServletResponse httpServletResponse){
+        String userId = Common.nulToEmptyString(request.getHeader(userIdInHeaderRequest));
+        this.zzMessageInfoService.exportHistoryMessageForSingle(userId,receiver,beginDate,endDate,type,httpServletResponse);
     }
 
 }
